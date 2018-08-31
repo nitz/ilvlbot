@@ -1,0 +1,9 @@
+/.vs
+/bnet/obj
+/bnet/bin
+/ilvlbot/bin
+/ilvlbot/obj
+/ilvlbot/Service References
+settings.conf
+/packages
+*.csproj.user

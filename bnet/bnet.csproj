@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{DEACF1C0-0B54-4830-83EB-2CBEF0C67CB7}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>bnet</RootNamespace>
+    <AssemblyName>bnet</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Api.KeyPair.cs" />
+    <Compile Include="Networking\Http\Cache.cs" />
+    <Compile Include="Networking\Http\CacheMode.cs" />
+    <Compile Include="Networking\Http\Common.cs" />
+    <Compile Include="Networking\Http\RequestResult.cs" />
+    <Compile Include="Responses\Appearance.cs" />
+    <Compile Include="Requests\Fields\Character.cs" />
+    <Compile Include="Requests\Get.cs" />
+    <Compile Include="Requests\Helpers.cs" />
+    <Compile Include="Requests\Strings.cs" />
+    <Compile Include="Responses\Achievements.cs" />
+    <Compile Include="Responses\ArtifactTrait.cs" />
+    <Compile Include="Responses\AzeriteEmpoweredItem.cs" />
+    <Compile Include="Responses\AzeriteItem.cs" />
+    <Compile Include="Responses\AzeritePower.cs" />
+    <Compile Include="Responses\Back.cs" />
+    <Compile Include="Api.cs" />
+    <Compile Include="ClassColor.cs" />
+    <Compile Include="Responses\Boss.cs" />
+    <Compile Include="Responses\Character.cs" />
+    <Compile Include="Responses\CharacterAchievements.cs" />
+    <Compile Include="Responses\CharacterAppearance.cs" />
+    <Compile Include="Responses\CharacterClasses.cs" />
+    <Compile Include="Responses\CharacterRaces.cs" />
+    <Compile Include="Responses\Chest.cs" />
+    <Compile Include="Responses\Class.cs" />
+    <Compile Include="Responses\Mount.cs" />
+    <Compile Include="Responses\Damage.cs" />
+    <Compile Include="Responses\Feet.cs" />
+    <Compile Include="Responses\Finger.cs" />
+    <Compile Include="Responses\Hands.cs" />
+    <Compile Include="Responses\Head.cs" />
+    <Compile Include="Responses\Item.cs" />
+    <Compile Include="Responses\ItemQuality.cs" />
+    <Compile Include="Responses\Items.cs" />
+    <Compile Include="Responses\Legs.cs" />
+    <Compile Include="Responses\MainHand.cs" />
+    <Compile Include="Responses\Mounts.cs" />
+    <Compile Include="Responses\Neck.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Responses\Achievement.cs" />
+    <Compile Include="Responses\ApiResponse.cs" />
+    <Compile Include="Responses\Criteria.cs" />
+    <Compile Include="Responses\Criterion.cs" />
+    <Compile Include="Responses\Emblem.cs" />
+    <Compile Include="Responses\Extensions.cs" />
+    <Compile Include="Responses\Feed.cs" />
+    <Compile Include="Responses\Guild.cs" />
+    <Compile Include="Responses\GuildMember.cs" />
+    <Compile Include="Responses\GuildMembers.cs" />
+    <Compile Include="Responses\Member.cs" />
+    <Compile Include="Responses\News.cs" />
+    <Compile Include="Responses\OffHand.cs" />
+    <Compile Include="Responses\Progression.cs" />
+    <Compile Include="Responses\Race.cs" />
+    <Compile Include="Responses\Raid.cs" />
+    <Compile Include="Responses\Relic.cs" />
+    <Compile Include="Responses\RewardItem.cs" />
+    <Compile Include="Responses\Shoulder.cs" />
+    <Compile Include="Responses\Spec.cs" />
+    <Compile Include="Responses\Stat.cs" />
+    <Compile Include="Responses\Statistic.cs" />
+    <Compile Include="Responses\Statistics.cs" />
+    <Compile Include="Responses\Stats.cs" />
+    <Compile Include="Responses\SubCategory.cs" />
+    <Compile Include="Responses\Tabard.cs" />
+    <Compile Include="Responses\Talent.cs" />
+    <Compile Include="Responses\Title.cs" />
+    <Compile Include="Responses\TooltipParams.cs" />
+    <Compile Include="Responses\Trinket.cs" />
+    <Compile Include="Responses\Waist.cs" />
+    <Compile Include="Responses\Weapon.cs" />
+    <Compile Include="Responses\WeaponInfo.cs" />
+    <Compile Include="Responses\Wrist.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
