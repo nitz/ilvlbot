@@ -9,7 +9,7 @@ namespace bnet
 	{
 		public static KeyPair Keys { internal get; set; } = null;
 
-		public static void Initialize(KeyPair apiKeys)
+		public static bool Initialize(KeyPair apiKeys)
 		{
 			// store key,
 			Keys = apiKeys;
@@ -21,14 +21,13 @@ namespace bnet
 			{
 				// set up the extension methods with the data they need.
 				Extensions.GetStaticInformation();
+				return true;
 			}
-			catch (System.Net.WebException wex)
+			catch (System.Exception /*ex*/)
 			{
-				// if it's a 403, just re-throw.
-				if ((wex.Response as System.Net.HttpWebResponse)?.StatusCode == System.Net.HttpStatusCode.Forbidden)
-					throw wex;
-
-				// failed to get static info for some other reason... we should probably handle that somehow.
+				// failed to get static info for some  reason... we should probably handle that somehow.
+				// for now, let our caller handle the failure, probably by retrying.
+				return false;
 			}
 		}
 	}

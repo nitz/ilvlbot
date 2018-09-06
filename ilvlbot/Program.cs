@@ -25,8 +25,15 @@ namespace ilvlbot
 			// set window title.
 			Console.Title = System.Reflection.Assembly.GetExecutingAssembly().FullName;
 
-			// init bnet & discord
-			Api.Initialize(Settings.ApiKeys.BattleNet);
+			// init bnet
+			while (Api.Initialize(Settings.ApiKeys.BattleNet) == false)
+			{
+				// failed to initialize the bnet api, wait a few seconds and retry.
+				Console.WriteLine("Failed to initialize Battle.net API, waiting a few seconds before retrying...");
+				await Task.Delay(TimeSpan.FromSeconds(3));
+			}
+
+			// init discord
 			Bot = new DiscordBot();
 
 			// grab ctrl+c
