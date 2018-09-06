@@ -14,6 +14,7 @@ namespace ilvlbot
 
 		internal static Configuration.Settings Settings;
 		internal static DiscordBot Bot;
+		internal static int apiInitRetrySeconds = 3;
 
 		static Program()
 		{
@@ -29,8 +30,8 @@ namespace ilvlbot
 			while (Api.Initialize(Settings.ApiKeys.BattleNet) == false)
 			{
 				// failed to initialize the bnet api, wait a few seconds and retry.
-				Console.WriteLine("Failed to initialize Battle.net API, waiting a few seconds before retrying...");
-				await Task.Delay(TimeSpan.FromSeconds(3));
+				Log($"Failed to initialize Battle.net API, waiting {apiInitRetrySeconds} seconds before retrying...");
+				await Task.Delay(TimeSpan.FromSeconds(apiInitRetrySeconds));
 			}
 
 			// init discord
@@ -46,6 +47,11 @@ namespace ilvlbot
 		private static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
 		{
 			Bot?.Shutdown().GetAwaiter().GetResult();
+		}
+
+		private void Log(string s)
+		{
+			Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] [GLOBAL] {s}");
 		}
 	}
 }
