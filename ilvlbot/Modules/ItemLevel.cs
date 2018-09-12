@@ -194,9 +194,9 @@ namespace ilvlbot.Modules
 
 			// actual fields
 			string ilvl = $"**{fc.items.calculatedItemLevel:0.00}** ({fc.items.averageItemLevel} bags)";
-			string azerite_level = fc.items.neck.isAzeriteItem ? $"**{fc.items.neck.azeriteLevel}** (ilvl {fc.items.neck.itemLevel})" : not_applicable;
-			string artifact_level = fc.items.artifactRank > 0 ? $"**{fc.items.artifactRank}**" : not_applicable;
-			string legendary_equipped = fc.items.legendaryItemCount > 0 ? $"**{fc.items.legendaryItemCount}**" : "0";
+			string azerite_level = (fc.items?.neck?.isAzeriteItem ?? false) ? $"**{fc.items.neck.azeriteLevel}** (ilvl {fc.items.neck.itemLevel})" : not_applicable;
+			string artifact_level = (fc.items?.artifactRank ?? 0) > 0 ? $"**{fc.items.artifactRank}**" : not_applicable;
+			string legendary_equipped = (fc.items?.legendaryItemCount ?? 0) > 0 ? $"**{fc.items.legendaryItemCount}**" : "0";
 			string ach_points = $"**{fc.achievementPoints}**";
 			
 			List<EmbedFieldBuilder> ach_fields = new List<EmbedFieldBuilder>();
