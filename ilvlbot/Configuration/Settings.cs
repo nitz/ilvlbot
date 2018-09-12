@@ -53,6 +53,7 @@ namespace ilvlbot.Configuration
 		{
 			public DiscordKeys Discord { get; internal set; } = new DiscordKeys("", "", "");
 			public bnet.Api.KeyPair BattleNet { get; internal set; } = new bnet.Api.KeyPair("", "");
+			[Newtonsoft.Json.JsonIgnore]
 			public bool KeysSet { get { return new[] { Discord.Token, Discord.ClientId, Discord.ClientSecret, BattleNet.Key, BattleNet.Secret }.All(x => string.IsNullOrEmpty(x)); } }
 		}
 
