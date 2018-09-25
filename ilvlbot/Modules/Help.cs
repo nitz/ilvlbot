@@ -3,8 +3,6 @@ using Discord.Commands;
 using System.Linq;
 using System.Threading.Tasks;
 using ilvlbot.Extensions;
-using Newtonsoft.Json;
-using RestSharp;
 
 /// <summary>
 /// Adapted from https://github.com/Aux/Discord.Net-Example/blob/1.0/Discord.Net-Example/Modules/HelpModule.cs
