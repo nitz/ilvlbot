@@ -3,7 +3,7 @@ A Discord bot that fetches World of Warcraft character info: item level, azerite
 
 ## Prerequisites
 
-I've built this with vs15 and try to stay up with patches. It's built against .NET 4.5.2.
+I've built this with vs15 and try to stay up with patches. It's built against .NET 4.7.2.
 
 ## Building
 
