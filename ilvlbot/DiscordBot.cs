@@ -9,8 +9,8 @@ namespace ilvlbot
 {
 	public class DiscordBot
 	{
-		private DiscordSocketClient client;
-		private CommandHandler commands;
+		private DiscordSocketClient _client;
+		private CommandHandler _commands;
 
 		public DiscordBot()
 		{
@@ -28,24 +28,24 @@ namespace ilvlbot
 					LogLevel = LogSeverity.Info,
 				};
 
-				client = new DiscordSocketClient(config);
+				_client = new DiscordSocketClient(config);
 
-				client.Log += Log;
-				client.Ready += ClientOnReady;
-				client.Connected += ClientOnConnected;
+				_client.Log += Log;
+				_client.Ready += ClientOnReady;
+				_client.Connected += ClientOnConnected;
 
 				Log("Connecting...");
 
-				await client.LoginAsync(TokenType.Bot, Program.Settings.ApiKeys.Discord.Token);
-				await client.StartAsync();
+				await _client.LoginAsync(TokenType.Bot, Program.Settings.ApiKeys.Discord.Token);
+				await _client.StartAsync();
 
 				// add ourself to our dependency mapper
 				var serviceCollection = new ServiceCollection();
-				serviceCollection.AddSingleton(client);
+				serviceCollection.AddSingleton(_client);
 
 				// install our commands
-				commands = new CommandHandler();
-				await commands.Install(serviceCollection);
+				_commands = new CommandHandler();
+				await _commands.Install(serviceCollection);
 
 				// hang out forever.
 				await Task.Delay(-1);
@@ -56,9 +56,11 @@ namespace ilvlbot
 			}
 		}
 
+		#region Client Event Handlers
+
 		private Task ClientOnConnected()
 		{
-			Log($"[Connected] Connection: {client.ConnectionState}, Login: {client.LoginState}.");
+			Log($"[Connected] Connection: {_client.ConnectionState}, Login: {_client.LoginState}.");
 			return Task.CompletedTask;
 		}
 
@@ -68,32 +70,35 @@ namespace ilvlbot
 			return Task.CompletedTask;
 		}
 
+		private Task Log(LogMessage l)
+		{
+			Log($"[{l.Severity}:{l.Source}] {l.Message}");
+			return Task.CompletedTask;
+		}
+
+		#endregion Client Event Handlers
+
 		public async Task Shutdown()
 		{
-			if (client != null && client.ConnectionState == ConnectionState.Connected)
+			if (_client != null && _client.ConnectionState == ConnectionState.Connected)
 			{
 				Log("Disconnecting...");
-				await client.StopAsync();
-				client = null;
+				await _client.StopAsync();
+				_client = null;
 			}
 		}
 
 		public async Task SetGame(string game, string url = "")
 		{
-			await client.SetGameAsync(game, url, StreamType.NotStreaming);
+			await _client.SetGameAsync(game, url, StreamType.NotStreaming);
 			Log($"Game changed to {game} ({url}).");
 		}
 
 		private void Log(string s)
 		{
-			Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] [BOT] {s}");
-		}
-
-		private async Task Log(LogMessage l)
-		{
-			await Task.Run(() =>
+			Task.Run(() =>
 			{
-				Log($"[{l.Severity}:{l.Source}] {l.Message}");
+				Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] [BOT] {s}");
 			});
 		}
 	}
