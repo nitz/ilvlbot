@@ -1,0 +1,12 @@
+# top-most EditorConfig file
+root = true
+
+# tab with of 4 please
+[*]
+tab_width = 4
+
+# 4 space indentation, crlf, insert newline.
+[*.{c,cpp,h,cs,xaml,editorconfig}]
+indent_style = tab
+end_of_line = crlf
+insert_final_newline = true
