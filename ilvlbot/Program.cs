@@ -26,16 +26,16 @@ namespace ilvlbot
 			// set window title.
 			Console.Title = System.Reflection.Assembly.GetExecutingAssembly().FullName;
 
+			// init discord
+			Bot = new DiscordBot();
+
 			// init bnet
-			while (Api.Initialize(Settings.ApiKeys.BattleNet) == false)
+			while (Api.Initialize(Settings.ApiKeys.BattleNet, Bot.Log) == false)
 			{
 				// failed to initialize the bnet api, wait a few seconds and retry.
 				Log($"Failed to initialize Battle.net API, waiting {apiInitRetrySeconds} seconds before retrying...");
 				await Task.Delay(TimeSpan.FromSeconds(apiInitRetrySeconds));
 			}
-
-			// init discord
-			Bot = new DiscordBot();
 
 			// grab ctrl+c
 			Console.CancelKeyPress += Console_CancelKeyPress;

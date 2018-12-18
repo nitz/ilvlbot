@@ -94,7 +94,7 @@ namespace ilvlbot
 			Log($"Game changed to {game} ({url}).");
 		}
 
-		private void Log(string s)
+		internal void Log(string s)
 		{
 			Task.Run(() =>
 			{

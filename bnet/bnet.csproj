@@ -96,6 +96,7 @@
     <Compile Include="Responses\GuildMembers.cs" />
     <Compile Include="Responses\Member.cs" />
     <Compile Include="Responses\News.cs" />
+    <Compile Include="Responses\OAuth.cs" />
     <Compile Include="Responses\OffHand.cs" />
     <Compile Include="Responses\Progression.cs" />
     <Compile Include="Responses\Race.cs" />
@@ -121,8 +122,11 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json">
-      <Version>11.0.2</Version>
+      <Version>12.0.1</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Api.ClientSecret.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

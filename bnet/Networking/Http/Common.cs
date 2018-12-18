@@ -31,7 +31,7 @@ namespace bnet.Networking.Http
 			dontPrintStrings.Add(s);
 		}
 
-		public static async Task<RequestResult<T>> RequestAndDeserialize<T>(string request, CacheMode cache_mode = CacheMode.Uncached) where T : class
+		public static async Task<RequestResult<T>> RequestAndDeserialize<T>(string request, CacheMode cache_mode = CacheMode.Uncached, HttpContent postContent = null, params KeyValuePair<string, string>[] additionalHeaders) where T : class
 		{
 			try
 			{
@@ -50,10 +50,33 @@ namespace bnet.Networking.Http
 				if (status != HttpStatusCode.OK)
 				{
 					//Console.WriteLine($"[BNET]: {Scrub(request)}");
-					HttpResponseMessage resp = await client.GetAsync(request);
+
+					HttpResponseMessage resp = null;
+
+					var method = (postContent == null) ? HttpMethod.Get : HttpMethod.Post;
+
+					using (var hrm = new HttpRequestMessage(method, request))
+					{
+						if (additionalHeaders != null)
+						{
+							foreach (var p in additionalHeaders)
+							{
+								hrm.Headers.Add(p.Key, p.Value);
+							}
+						}
+
+						if (postContent != null)
+						{
+							hrm.Content = postContent;
+						}
+
+						resp = await client.SendAsync(hrm);
+					}
 
 					if (resp == null)
+					{
 						return null;
+					}
 
 					status = resp.StatusCode;
 

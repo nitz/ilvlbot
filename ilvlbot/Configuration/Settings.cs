@@ -52,9 +52,9 @@ namespace ilvlbot.Configuration
 		public class ApiKeyConfig
 		{
 			public DiscordKeys Discord { get; internal set; } = new DiscordKeys("", "", "");
-			public bnet.Api.KeyPair BattleNet { get; internal set; } = new bnet.Api.KeyPair("", "");
+			public bnet.Api.ClientSecret BattleNet { get; internal set; } = new bnet.Api.ClientSecret("", "");
 			[Newtonsoft.Json.JsonIgnore]
-			public bool KeysSet { get { return new[] { Discord.Token, Discord.ClientId, Discord.ClientSecret, BattleNet.Key, BattleNet.Secret }.All(x => string.IsNullOrEmpty(x)); } }
+			public bool KeysSet { get { return new[] { Discord.Token, Discord.ClientId, Discord.ClientSecret, BattleNet.ID, BattleNet.Secret }.All(x => string.IsNullOrEmpty(x)); } }
 		}
 
 		public class DiscordKeys
@@ -76,7 +76,7 @@ namespace ilvlbot.Configuration
 			private string _defaultRealm = "Stormrage";
 			
 			public TimeSpan GuildRequestCooldown { get; set; } = TimeSpan.FromMinutes(3);
-			public int MaxGuildCharacters { get; set; } = 15;
+			public int MaxGuildCharacters { get; set; } = 30;
 			public string DefaultRealm { get { return _defaultRealm.ToRealmUri(); } set { _defaultRealm = value; } }
 			public string DefaultGuild { get; set; } = "Gently Wafting Curtains";
 			public int GuildTargetLevel { get; set; } = 120;
@@ -87,11 +87,13 @@ namespace ilvlbot.Configuration
 			public const int AotcGuldan = 11195;
 			public const int AotcKilJaeden = 11874;
 			public const int AotcGhuun = 12536;
+			public const int AotcJaina = 13322;
+			public const int AotcUunat = 13418;
 
 			/// <summary>
 			/// A list of achievement ids to check when an individual character is looked up.
 			/// </summary>
-			public int[] CheckedAchievements { get; set; } = { AotcGhuun };
+			public int[] CheckedAchievements { get; set; } = { AotcUunat, AotcJaina, AotcGhuun };
 
 			/// <summary>
 			/// The default region to use for WoW Token Price Checking
@@ -105,7 +107,8 @@ namespace ilvlbot.Configuration
 
 			try
 			{
-				settings = Newtonsoft.Json.JsonConvert.DeserializeObject<Settings>(File.ReadAllText(file));
+				string text = File.ReadAllText(file);
+				settings = Newtonsoft.Json.JsonConvert.DeserializeObject<Settings>(text);
 			}
 			catch (Exception ex)
 			{
