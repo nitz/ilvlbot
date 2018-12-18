@@ -34,11 +34,10 @@ namespace bnet
 				// set up timer to refresh access token.
 				// this is probably not the best way to do this.
 				_accessTokenRenewalCancellation = new CancellationTokenSource();
-				_accessTokenRenewal = new Task(KeepAccessTokenRenewed, _accessTokenRenewalCancellation.Token, TaskCreationOptions.LongRunning);
-
-				_accessTokenRenewal.Start();
+				_accessTokenRenewal = Task.Factory.StartNew(KeepAccessTokenRenewed, _accessTokenRenewalCancellation.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
 				DateTime failAt = DateTime.Now.AddSeconds(5);
+
 				while (true)
 				{
 					lock (_accessToken)
@@ -50,9 +49,12 @@ namespace bnet
 						}
 					}
 
-					if (DateTime.Now > failAt)
+					if (DateTime.Now >= failAt)
 					{
 						Log("Failed to get initial access token.");
+
+						_accessTokenRenewalCancellation.Cancel(throwOnFirstException: true);
+
 						return false;
 					}
 				}
@@ -92,7 +94,8 @@ namespace bnet
 				var renewAt = _accessToken.ExpiresAt.Subtract(_accessTokenRenewBefore);
 				var delayFor = renewAt - DateTime.Now;
 
-				Log($"Successfully retrieved access token. Will attempt to renew at {renewAt}, delaying for: {delayFor}");
+				Log($"Successfully retrieved access token.");
+				Log($"Will attempt to renew at {renewAt}, delaying for: {delayFor}");
 
 				Task.Delay(delayFor, _accessTokenRenewalCancellation.Token).Wait();
 			}
