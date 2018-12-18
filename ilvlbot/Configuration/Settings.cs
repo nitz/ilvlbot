@@ -93,7 +93,7 @@ namespace ilvlbot.Configuration
 			/// <summary>
 			/// A list of achievement ids to check when an individual character is looked up.
 			/// </summary>
-			public int[] CheckedAchievements { get; set; } = { AotcUunat, AotcJaina, AotcGhuun };
+			public int[] CheckedAchievements { get; set; } = { AotcJaina, AotcUunat };
 
 			/// <summary>
 			/// The default region to use for WoW Token Price Checking
