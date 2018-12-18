@@ -54,7 +54,7 @@ namespace ilvlbot.Configuration
 			public DiscordKeys Discord { get; internal set; } = new DiscordKeys("", "", "");
 			public bnet.Api.ClientSecret BattleNet { get; internal set; } = new bnet.Api.ClientSecret("", "");
 			[Newtonsoft.Json.JsonIgnore]
-			public bool KeysSet { get { return new[] { Discord.Token, Discord.ClientId, Discord.ClientSecret, BattleNet.ID, BattleNet.Secret }.All(x => string.IsNullOrEmpty(x)); } }
+			public bool KeysSet { get { return new[] { Discord.Token, Discord.ClientId, Discord.ClientSecret, BattleNet.ID, BattleNet.Secret }.All(x => string.IsNullOrEmpty(x) == false); } }
 		}
 
 		public class DiscordKeys
@@ -118,6 +118,18 @@ namespace ilvlbot.Configuration
 				File.WriteAllText(file, Newtonsoft.Json.JsonConvert.SerializeObject(new Settings(), Newtonsoft.Json.Formatting.Indented));
 
 				Console.WriteLine($"Wrote an empty file to '{file}', fill it out and run again!\nPress any key to exit.");
+				Console.ReadKey();
+				Environment.Exit(-1);
+			}
+
+			if (settings.ApiKeys.KeysSet == false)
+			{
+				Console.WriteLine("API ID/Secret/Keys not all set.\n" +
+					"Please check your settings.conf and ensure you've set everything.\n" +
+					"As well, please note after moving to the Blizzard OAuth API, the BattleNet\n" +
+					"Now expexts 'ID' and 'Secret' rather than 'Key' and 'Secret.\n" +
+					"Get your ID/Secret at https://develop.battle.net/access/clients \n" +
+					"Press any key to exit.");
 				Console.ReadKey();
 				Environment.Exit(-1);
 			}
