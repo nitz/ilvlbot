@@ -115,7 +115,7 @@ namespace ilvlbot.Modules
 			string about = "Hi, I was created by <@116026533688115204>.\n" +
 							"I'm just a silly little bot that looks up player's (and guild's) item levels via the Battle.Net API.\n" +
 							"I'm definitely not perfect, so please do feel free to share issues or ideas you have with my creator!\n" +
-							"If you ask, I'm sure he'd be willing to share my source code with you, too!\n" +
+							"If you'd like, you can check out my source code at <https://github.com/nitz/ilvlbot>!\n" +
 							"\nTechnical info for nerds:\n" +
 							$"```" +
 							$"Application: {app}\n" +
@@ -136,7 +136,8 @@ namespace ilvlbot.Modules
 			var bd = AssemblyExtensions.CompileDate;
 			string built = bd.ToLongDateString() + " at " + bd.ToLongTimeString();
 			string discordnet = ($"v{DiscordConfig.Version} (API v{DiscordConfig.APIVersion}); ") + System.Reflection.Assembly.GetAssembly(Context.Client.GetType()).FullName;
-			string about = "v1.2: Added support for Azerite items, removed artifact/legendary info. Fixed profile images.\n" +
+			string about = "v1.3: Swapped to using new Blizzard API with OAuth.\n" +
+							"v1.2: Added support for Azerite items, removed artifact/legendary info. Fixed profile images.\n" +
 							"v1.1: Fixed broken WoWToken.info commands, updated dependances. \n" +
 							"v1.0: Initial release." +
 							"\nTechnical info for nerds:\n" +

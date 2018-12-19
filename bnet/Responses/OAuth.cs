@@ -19,17 +19,18 @@ namespace bnet.Responses
 		[JsonProperty("scope")]
 		public string Scope { get; set; }
 		
-		private DateTime _creationTimeStamp;
-		
 		[JsonIgnore]
-		public DateTime ExpiresAt => _creationTimeStamp.AddSeconds(_expiresInSeconds);
+		public DateTime ExpiresAt => CreatedAt.AddSeconds(_expiresInSeconds);
+
+		[JsonIgnore]
+		public DateTime CreatedAt { get; private set; }
 
 		[JsonIgnore]
 		public bool Valid => string.IsNullOrEmpty(AccessToken) == false && ExpiresAt > DateTime.Now;
 		
 		public OAuthAccessToken()
 		{
-			_creationTimeStamp = DateTime.Now;
+			CreatedAt = DateTime.Now;
 		}
 
 		public static implicit operator KeyValuePair<string, string>(OAuthAccessToken t)

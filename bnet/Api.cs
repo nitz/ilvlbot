@@ -57,6 +57,9 @@ namespace bnet
 
 						return false;
 					}
+
+					// no need to thrash the cpu while we wait.
+					Task.Delay(1).Wait();
 				}
 
 				// set up the extension methods with the data they need.
@@ -71,24 +74,46 @@ namespace bnet
 			}
 		}
 
+		/// <summary>
+		/// Gets a slice of the OAuth token for administration display, as well as when it expires.
+		/// </summary>
+		/// <returns>A few characters of the OAuth token, plus the current expiry date.</returns>
+		public static (string TokenSlice, DateTime CreatedAt, DateTime ExpiresAt) GetCurrentOAuthInfo()
+		{
+			string slice = _accessToken.AccessToken.Substring(0, 8) + "...";
+			return (slice, _accessToken.CreatedAt, _accessToken.ExpiresAt);
+		}
+
+		public static async Task<bool> RenewOAuthTokenNowAsync()
+		{
+			var newToken = await Get.AccessToken(Secrets);
+
+			if (newToken.Result.Valid == false)
+			{
+				// bad token!
+				return false;
+			}
+
+			lock (_accessToken)
+			{
+				_accessToken = newToken;
+			}
+
+			return true;
+		}
+
 		private static void KeepAccessTokenRenewed()
 		{
 			while (_accessTokenRenewalCancellation.Token.IsCancellationRequested == false)
 			{
 				Log("Getting new OAuth access token...");
-				var newToken = Get.AccessToken(Secrets).GetAwaiter().GetResult();
 
-				if (newToken.Result.Valid == false)
+				bool gotNewToken = RenewOAuthTokenNowAsync().GetAwaiter().GetResult();
+
+				if (gotNewToken == false)
 				{
-					// bad token! wait and try again.
 					Log($"Access token invalid, retrying in {_accessTokenRenewalFailRetry}...");
 					Task.Delay(_accessTokenRenewalFailRetry, _accessTokenRenewalCancellation.Token).Wait();
-					continue;
-				}
-
-				lock (_accessToken)
-				{
-					_accessToken = newToken;
 				}
 
 				var renewAt = _accessToken.ExpiresAt.Subtract(_accessTokenRenewBefore);

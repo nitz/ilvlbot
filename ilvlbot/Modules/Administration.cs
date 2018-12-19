@@ -56,6 +56,46 @@ namespace ilvlbot.Modules
 			await Context.Client.SetGameAsync(game, null, StreamType.NotStreaming);
 		}
 
+		[Command("oauth"), Alias("auth", "authentication")]
+		[Remarks("Gets information about the current bnet authentication.")]
+		[Summary("Gets information about the current bnet authentication.")]
+		public async Task GetOAuthInfo()
+		{
+			await ReplyAsync(GetOAuthTokenOutputString().ToString());
+		}
+
+		[Command("oauthrenew"), Alias("renewoauth")]
+		[Remarks("Forces a renew of the the OAuth token, if possible.")]
+		[Summary("Forces a renew of the the OAuth token, if possible.")]
+		public async Task GetNewOAuthToken()
+		{
+			bool renewed = await bnet.Api.RenewOAuthTokenNowAsync();
+
+			if (renewed)
+			{
+				var output = new StringBuilder();
+				output.AppendLine("OAuth token renewed.");
+				output.AppendLine(GetOAuthTokenOutputString().ToString());
+				await ReplyAsync(output.ToString());
+			}
+			else
+			{
+				await ReplyAsync("Failed to renew OAuth token.");
+			}
+		}
+
+		private StringBuilder GetOAuthTokenOutputString()
+		{
+			var oauthInfo = bnet.Api.GetCurrentOAuthInfo();
+			var output = new StringBuilder();
+			output.AppendLine("Authentication information: ```");
+			output.AppendLine($"Token Slice: {oauthInfo.TokenSlice}");
+			output.AppendLine($"Aquired: {oauthInfo.CreatedAt}");
+			output.AppendLine($"Expires: {oauthInfo.ExpiresAt}");
+			output.Append("```");
+			return output;
+		}
+
 		/// <summary>
 		/// Just a simple wrapper for this class to dump to the console.
 		/// </summary>
