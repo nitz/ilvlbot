@@ -14,7 +14,7 @@ namespace ilvlbot.Access
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 	public class DisabledAttribute : PreconditionAttribute
 	{
-		public override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider service)
+		public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider service)
 		{
 			// Disabled commands can't execute.
 			return Task.FromResult(PreconditionResult.FromError("Command disabled."));

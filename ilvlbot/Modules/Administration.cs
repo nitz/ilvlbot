@@ -53,7 +53,7 @@ namespace ilvlbot.Modules
 		public async Task SetPlaying([Remainder]string game)
 		{
 			Log($"SetPlaying: {game}");
-			await Context.Client.SetGameAsync(game, null, StreamType.NotStreaming);
+			await Context.Client.SetGameAsync(game, null, ActivityType.Playing);
 		}
 
 		[Command("oauth"), Alias("auth", "authentication")]

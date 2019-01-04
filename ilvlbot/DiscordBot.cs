@@ -90,7 +90,7 @@ namespace ilvlbot
 
 		public async Task SetGame(string game, string url = "")
 		{
-			await _client.SetGameAsync(game, url, StreamType.NotStreaming);
+			await _client.SetGameAsync(game, url, ActivityType.Playing);
 			Log($"Game changed to {game} ({url}).");
 		}
 

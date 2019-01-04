@@ -23,7 +23,7 @@ namespace ilvlbot.Access
 			Level = level;
 		}
 
-		public override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider service)
+		public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider service)
 		{
 			// Get the acccesslevel for this context
 			var access = GetAccessLevel(context);

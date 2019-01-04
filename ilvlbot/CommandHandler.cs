@@ -27,11 +27,11 @@ namespace ilvlbot
 			_serviceCollection = serviceCollection;
 			_serviceCollection.AddSingleton(_commands);
 
-			// load all the command modules
-			await _commands.AddModulesAsync(Assembly.GetEntryAssembly());
-
 			// build the service provider
 			_serviceProvider = _serviceCollection.BuildServiceProvider();
+
+			// load all the command modules
+			await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _serviceProvider);
 
 			// subscribe to the incoming message
 			_client = _serviceProvider.GetService(typeof(DiscordSocketClient)) as DiscordSocketClient;

@@ -136,7 +136,8 @@ namespace ilvlbot.Modules
 			var bd = AssemblyExtensions.CompileDate;
 			string built = bd.ToLongDateString() + " at " + bd.ToLongTimeString();
 			string discordnet = ($"v{DiscordConfig.Version} (API v{DiscordConfig.APIVersion}); ") + System.Reflection.Assembly.GetAssembly(Context.Client.GetType()).FullName;
-			string about = "v1.3: Swapped to using new Blizzard API with OAuth.\n" +
+			string about = "v1.4: Bumped Discord.Net to 2.0.0.\n" + 
+							"v1.3: Swapped to using new Blizzard API with OAuth.\n" +
 							"v1.2: Added support for Azerite items, removed artifact/legendary info. Fixed profile images.\n" +
 							"v1.1: Fixed broken WoWToken.info commands, updated dependances. \n" +
 							"v1.0: Initial release." +
