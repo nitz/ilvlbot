@@ -131,12 +131,12 @@ namespace ilvlbot.Modules
 		[Remarks("Returns a little bit of information about what's changed lately.")]
 		public async Task Changelog()
 		{
-			var asm = System.Reflection.Assembly.GetExecutingAssembly();
-			string app = asm.FullName;
+			string app = AssemblyExtensions.FullName;
 			var bd = AssemblyExtensions.CompileDate;
 			string built = bd.ToLongDateString() + " at " + bd.ToLongTimeString();
 			string discordnet = ($"v{DiscordConfig.Version} (API v{DiscordConfig.APIVersion}); ") + System.Reflection.Assembly.GetAssembly(Context.Client.GetType()).FullName;
-			string about = "v1.4: Bumped Discord.Net to 2.0.0.\n" + 
+			string about = "v1.5: Added alternative server specification syntax for ilvl commands, gilvl ouput refreshed.\n" +
+							"v1.4: Bumped Discord.Net to 2.0.0.\n" +
 							"v1.3: Swapped to using new Blizzard API with OAuth.\n" +
 							"v1.2: Added support for Azerite items, removed artifact/legendary info. Fixed profile images.\n" +
 							"v1.1: Fixed broken WoWToken.info commands, updated dependances. \n" +

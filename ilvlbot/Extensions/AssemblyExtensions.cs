@@ -41,6 +41,31 @@ namespace ilvlbot.Extensions
 				return compileDate ?? new System.DateTime();
 			}
 		}
+
+		/// <summary>
+		/// Retrieves the executing assembly's full name.
+		/// </summary>
+		public static string FullName
+		{
+			get
+			{
+				var asm = System.Reflection.Assembly.GetExecutingAssembly();
+				return asm.FullName;
+			}
+		}
+
+		/// <summary>
+		/// Retrieves the executing assembly's short name.
+		/// </summary>
+		public static string ShortName
+		{
+			get
+			{
+				var asm = System.Reflection.Assembly.GetExecutingAssembly();
+				return asm.GetName().Name;
+			}
+		}
+
 		private static System.DateTime? compileDate;
 
 		/// <summary>

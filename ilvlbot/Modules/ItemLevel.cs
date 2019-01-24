@@ -85,7 +85,7 @@ namespace ilvlbot.Modules
 		{
 			try
 			{
-				var cmd = ParsedCommand.Parse(character, '/', Program.Settings.ItemLevel.DefaultRealm, string.Empty);
+				var cmd = ParsedCommand.Parse(character, Program.Settings.ItemLevel.DefaultRealm, string.Empty);
 				var output = await ProcessCharacterCommand(cmd);
 
 				if (output.IsEmbedResult)
@@ -113,9 +113,13 @@ namespace ilvlbot.Modules
 		{
 			try
 			{
-				var cmd = ParsedCommand.Parse(guild, '/', Program.Settings.ItemLevel.DefaultRealm, Program.Settings.ItemLevel.DefaultGuild);
-				string output = await ProcessGuildCommand(cmd);
-				await ReplyAsync(output);
+				var cmd = ParsedCommand.Parse(guild, Program.Settings.ItemLevel.DefaultRealm, Program.Settings.ItemLevel.DefaultGuild);
+				var output = await ProcessGuildCommand(cmd);
+
+				if (output.IsEmbedResult)
+					await ReplyAsync("", embed: output.EmbedResult);
+				else
+					await ReplyAsync(output.StringResult);
 			}
 			catch (Exception ex)
 			{
@@ -130,13 +134,13 @@ namespace ilvlbot.Modules
 		/// </summary>
 		/// <param name="cmd">The command to process</param>
 		/// <returns>A CharacterResult which will have either a string to reply to the channel with, or an Embed to send to the channel.</returns>
-		private async Task<CharacterResult> ProcessCharacterCommand(ParsedCommand cmd)
+		private async Task<CommandResult> ProcessCharacterCommand(ParsedCommand cmd)
 		{
 			// we need a target name for a character!
 			if (cmd.TargetName == string.Empty)
 			{
 				Log("No target.", true);
-				return new CharacterResult($"I can't look up a character if you don't give me a name!");
+				return new CommandResult($"I can't look up a character if you don't give me a name!");
 			}
 
 			Log($"ProcessCharacterCommand: {cmd.RealmName}/{cmd.TargetName}");
@@ -149,13 +153,13 @@ namespace ilvlbot.Modules
 			if (character_result.Successful == false)
 			{
 				if (character_result.StatusCode == System.Net.HttpStatusCode.NotFound)
-					return new CharacterResult($"I couldn't find `{cmd.RealmName}/{cmd.TargetName}`. Perhaps they're too low level or haven't logged in recently?");
-				return new CharacterResult($"I had problems finding infomation for `{cmd.RealmName}/{cmd.TargetName}`, sorry! Tell a nerd: {character_result.ErrorText}");
+					return new CommandResult($"I couldn't find `{cmd.RealmName}/{cmd.TargetName}`. Perhaps they're too low level or haven't logged in recently?");
+				return new CommandResult($"I had problems finding infomation for `{cmd.RealmName}/{cmd.TargetName}`, sorry! Tell a nerd: {character_result.ErrorText}");
 			}
 
 			var character = character_result.Result;
 
-			return new CharacterResult(await BuildCharacterEmbed(character));
+			return new CommandResult(await BuildCharacterEmbed(character));
 
 		}
 
@@ -229,7 +233,7 @@ namespace ilvlbot.Modules
 			efb.Text = judgementalLines.GetRandom();
 
 			// the last modified is (usually) the last time the character logged out of the game.
-			DateTimeOffset dto = DateTime.SpecifyKind(fc.lastModifiedDateTime, DateTimeKind.Utc);
+			DateTimeOffset dto = DateTime.SpecifyKind(fc.lastModifiedDateTime, DateTimeKind.Local);
 
 			// build the Embed
 			EmbedBuilder builder = new EmbedBuilder()
@@ -274,19 +278,20 @@ namespace ilvlbot.Modules
 		/// Processes a guild command.
 		/// </summary>
 		/// <param name="cmd">The command to process.</param>
-		/// <returns>A string representing the itemlevels of the top guild members.</returns>
-		private async Task<string> ProcessGuildCommand(ParsedCommand cmd)
+		/// <returns>A CharacterResult representing the itemlevels of the top guild members,
+		/// which will have either a string to reply to the channel with, or an Embed to send to the channel.</returns>
+		private async Task<CommandResult> ProcessGuildCommand(ParsedCommand cmd)
 		{
-			string output = string.Empty;
 			GuildInfo g = GetGuild(cmd.RealmName, cmd.TargetName, Program.Settings.ItemLevel.GuildTargetLevel);
 			TimeSpan time_since_update = DateTime.Now - g.LastRefresh;
 
 			if (time_since_update > Program.Settings.ItemLevel.GuildRequestCooldown)
 			{
 				Log($"ProcessGuildCommand: `{cmd.RealmName}/{cmd.TargetName}`");
-				await ReplyAsync($"Okay, give me a few. Looking up `{cmd.TargetName}` on `{cmd.RealmName}` now.");
+				var holdOnMessage = await ReplyAsync($"Okay, give me a few. Looking up `{cmd.TargetName}` on `{cmd.RealmName}` now.");
 				var output_task = UpdateGuild(g);
 
+				// wait for the guild to update.
 				while (output_task.IsCompleted == false)
 				{
 					// tell them i'm 'typing', which lasts for 10 seconds, which is almost how long i'll wait to see if the task is done.
@@ -295,17 +300,21 @@ namespace ilvlbot.Modules
 					output_task.Wait(TimeSpan.FromSeconds(8));
 				}
 
-				output = output_task.Result;
+				// done doing my thing, remove my 'hold on' message.
+				await holdOnMessage.DeleteAsync();
+
+				return output_task.Result;
 			}
 			else
 			{
 				TimeSpan cooldown_left = Program.Settings.ItemLevel.GuildRequestCooldown - time_since_update;
-				// give em a lazy reason.
-				output = $"{lazyReasons.GetRandom()} (cooldown remaining: {cooldown_left:mm\\:ss})";
-				Log($"Not updating guild: {output}", true);
-			}
 
-			return output;
+				// give em a lazy reason.
+				string output = $"{lazyReasons.GetRandom()} (cooldown remaining: {cooldown_left:mm\\:ss})";
+				Log($"Not updating guild: {output}", true);
+
+				return new CommandResult(output);
+			}
 		}
 		
 		/// <summary>
@@ -313,10 +322,8 @@ namespace ilvlbot.Modules
 		/// </summary>
 		/// <param name="guild">The guild to update.</param>
 		/// <returns>Output string designed to be sent to the channel.</returns>
-		private async Task<string> UpdateGuild(GuildInfo guild)
+		private async Task<CommandResult> UpdateGuild(GuildInfo guild)
 		{
-			string output = string.Empty;
-			
 			// time how long it takes me to get everyone.
 			var sw = new System.Diagnostics.Stopwatch();
 			sw.Start();
@@ -333,19 +340,29 @@ namespace ilvlbot.Modules
 				if (guild.TargetLevelCharacterCount == 0)
 				{
 					sb.AppendLine($"Since none are {guild.TargetLevel}, I won't bother looking up their item levels. :wink:");
-					output = sb.ToString();
-					return output;
+					return new CommandResult(sb.ToString());
 				}
 
 				int number_shown = Math.Min(guild.GuildMembers.Count, Program.Settings.ItemLevel.MaxGuildCharacters);
+
 				sb.AppendLine($"Here's the top {number_shown} ('in bags' ilvl in parenthesis)");
+
+				// asciidoc code blocks have some nice syntax highlighting I can abuse.
+				// lines starting "<text> :: <text>" will have the first text and double colon turned red.
+				// lines with a line of dashes or equals under them will be blue (with the dashed line)
+				// lines with text like "[<text>]" will be red, as will ":<text>:"
+				// lines starting with * or - will have the * or - colored red.
+				// some basic markdown shows too, (without eating characters) which is neat.
+				sb.AppendLine("```asciidoc"); 
+
+				sb.AppendLine($"{guild.Guild}");
 				sb.AppendLine("-----");
 
 				// include the top maxMembers characters
 				int count = 0;
 				foreach (var c in guild.GuildMembers)
 				{
-					sb.AppendLine($"{c.guildCharacter.name}: {c.character.items.calculatedItemLevel:0.00} ({c.character.items.averageItemLevel})");
+					sb.AppendLine($"{c.character.items.calculatedItemLevel:0.00} ({c.character.items.averageItemLevel}) :: {c.guildCharacter.name}");
 
 					++count;
 					if (count >= Program.Settings.ItemLevel.MaxGuildCharacters)
@@ -363,18 +380,41 @@ namespace ilvlbot.Modules
 					sb.Remove(sb.Length - 2, 2);
 				}
 
-				sb.AppendLine();
+				// close the code block.
+				sb.AppendLine("```");
+
 				sb.AppendLine($"It took me {sw.Elapsed.TotalSeconds:0} seconds to look everyone up.");
 
-				output = sb.ToString();
-			}
-			else
-			{
-				// something went wrong, report the error.
-				output = "There was an issue getting the info: " + guild.LastError;
+				// build a nice embed to wrap it all up in.
+				EmbedFooterBuilder efb = new EmbedFooterBuilder()
+					.WithText(AssemblyExtensions.ShortName);
+
+				DateTimeOffset dto = DateTime.SpecifyKind(guild.LastRefresh, DateTimeKind.Local);
+
+				EmbedBuilder builder = new EmbedBuilder()
+				{
+					// title/url for wowprogress
+					Title = $"{guild.Guild} Item Level Report",
+					//Url = "maybe get an armory url here...",
+
+					// some general pretty
+					Color = Color.DarkPurple,
+
+					// description is my primary output
+					Description = sb.ToString(),
+
+					// footer for timestamp and appname
+					Footer = efb,
+
+					// and the date/time.
+					Timestamp = dto,
+				};
+
+				return new CommandResult(builder.Build());
 			}
 
-			return output;
+			// something went wrong, report the error.
+			return new CommandResult($"There was an issue getting the info: {guild.LastError}");
 		}
 
 		/// <summary>

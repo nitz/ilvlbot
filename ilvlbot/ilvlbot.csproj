@@ -62,7 +62,7 @@
     <Compile Include="Modules\ItemLevel.cs" />
     <Compile Include="Modules\ItemLevel.GuildInfo.cs" />
     <Compile Include="Modules\ItemLevel.ParsedCommand.cs" />
-    <Compile Include="Modules\ItemLevel.CharacterResult.cs" />
+    <Compile Include="Modules\ItemLevel.CommandResult.cs" />
     <Compile Include="Modules\WowToken.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

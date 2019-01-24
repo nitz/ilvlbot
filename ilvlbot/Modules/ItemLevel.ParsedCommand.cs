@@ -19,20 +19,20 @@ namespace ilvlbot.Modules
 			}
 
 			// this whole class could probably be replaced with a nice regex.
-			public static ParsedCommand Parse(string remainder, char args_splitter, string default_realm, string default_target)
+			public static ParsedCommand Parse(string remainder, string defaultRealm, string defaultTarget)
 			{
 				if (remainder.Length == 0)
 				{
 					// they gave me no command, just use the defaults.
 					return new ParsedCommand()
 					{
-						RealmName = default_realm,
-						TargetName = default_target,
+						RealmName = defaultRealm,
+						TargetName = defaultTarget,
 					};
 				}
 
 				// there's at least a bit of an argument
-				string[] splits = remainder.Split(new char[] { args_splitter }, 2);
+				string[] splits = SplitsByPotentialSyntax(remainder);
 
 				if (splits.Length == 2)
 				{
@@ -48,10 +48,33 @@ namespace ilvlbot.Modules
 					// they only gave me a target, assume default realm.
 					return new ParsedCommand()
 					{
-						RealmName = default_realm,
+						RealmName = defaultRealm,
 						TargetName = splits[0],
 					};
 				}
+			}
+
+			private static string[] SplitsByPotentialSyntax(string val)
+			{
+				if (val.Contains("/"))
+				{
+					// eg "My Realm/My Guild"
+					// traditional full syntax, split on the slash.
+					return val.Split(new char[] { '/' }, 2);
+				}
+				else if (val.StartsWith("\"") && val.EndsWith("\"") && val.Contains("-"))
+				{
+					// eg: "My Guild-My Realm"
+					// alternative, full-quoted syntax. remove quotes and split by hyphen.
+					// then flip the array because the realm comes second in this syntax.
+					var res = val.Trim(new[] { '"' }).Split(new[] { '-' }, 2);
+					Array.Reverse(res);
+					return res;
+				}
+
+				// no slash or dash, assume it's just a guild/character name,
+				// allow the default to be used for realm.
+				return new[] { val };
 			}
 		}
 	}

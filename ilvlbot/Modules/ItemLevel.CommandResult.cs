@@ -7,7 +7,7 @@ namespace ilvlbot.Modules
 		/// <summary>
 		/// A small class to handle the result returned from the Character function.
 		/// </summary>
-		private class CharacterResult
+		private class CommandResult
 		{
 			public Embed EmbedResult { get; set; }
 			public string StringResult { get; set; }
@@ -15,13 +15,13 @@ namespace ilvlbot.Modules
 			public bool IsEmbedResult { get { return EmbedResult != null; } }
 			public bool IsStringResult { get { return StringResult != null; } }
 
-			public CharacterResult(string res)
+			public CommandResult(string res)
 			{
 				StringResult = res;
 				EmbedResult = null;
 			}
 
-			public CharacterResult(Embed res)
+			public CommandResult(Embed res)
 			{
 				StringResult = null;
 				EmbedResult = res;
