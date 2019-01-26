@@ -3,7 +3,9 @@
 /bnet/bin
 /ilvlbot/bin
 /ilvlbot/obj
+/ilvlbot/publish
 /ilvlbot/Service References
 settings.conf
 /packages
 *.csproj.user
+*.pubxml.user

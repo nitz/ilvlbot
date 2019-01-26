@@ -3,7 +3,7 @@ A Discord bot that fetches World of Warcraft character info: item level, azerite
 
 ## Prerequisites
 
-I've built this with vs15 and try to stay up with patches. It's built against .NET 4.7.2.
+I've built this with vs15 and try to stay up with patches. It's built with .NET Core 2.2. You'll need the .NET Core 2.2 SDK installed. As of writing, it doesn't seem to come as a component in the msvs installer, and instead is installed seperatedly from [Microsoft's Site](https://dotnet.microsoft.com/download).
 
 ## Building
 
@@ -11,11 +11,11 @@ Fire up Visual Studio 2017 and smash build. It should grab the required nuget pa
 
 ## Running
 
-You'll need to set up a few configuation options. Run the compiled binary once and it'll spit out a default `settings.conf` for you. Add your Discord and battlenet API keys and you should be solid.
+You'll need to set up a few configuation options. Run the compiled application once and it'll spit out a default `settings.conf` for you (if it didn't copy the blank one from the project folder). Add your Discord and Blizzard API keys and you should be solid.
 
 ## Todo
 
-Provide some useful info on what is actually going on here.
+Provide some useful info on what is actually going on here. Still have some bits I want to clean up with better DI (settings in particular.) Still a few places I could move to some newer C# 7 syntax.
 
 ## Thanks
 

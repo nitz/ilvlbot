@@ -91,7 +91,7 @@ namespace ilvlbot.Extensions
 					s.Close();
 			}
 			var dt = new System.DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(System.BitConverter.ToInt32(b, System.BitConverter.ToInt32(b, peHeaderOffset) + linkerTimestampOffset));
-			return dt.AddHours(System.TimeZone.CurrentTimeZone.GetUtcOffset(dt).Hours);
+			return dt.AddHours(TimeZoneInfo.Local.GetUtcOffset(dt).Hours);
 		}
 	}
 }
