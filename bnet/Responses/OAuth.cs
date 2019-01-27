@@ -1,7 +1,7 @@
 
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
+using System.Net.Http.Headers;
 
 namespace bnet.Responses
 {
@@ -33,9 +33,9 @@ namespace bnet.Responses
 			CreatedAt = DateTime.Now;
 		}
 
-		public static implicit operator KeyValuePair<string, string>(OAuthAccessToken t)
+		public static implicit operator AuthenticationHeaderValue(OAuthAccessToken t)
 		{
-			return new KeyValuePair<string, string>("Authorization", $"Bearer {t.AccessToken}");
+			return new AuthenticationHeaderValue("Bearer", t.AccessToken);
 		}
  }
 }

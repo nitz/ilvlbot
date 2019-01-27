@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace bnet
 {
@@ -19,10 +19,10 @@ namespace bnet
 				Secret = secret;
 			}
 
-			public static implicit operator KeyValuePair<string, string>(ClientSecret s)
+			public static implicit operator AuthenticationHeaderValue(ClientSecret s)
 			{
 				string authString = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{s.ID}:{s.Secret}"));
-				return new KeyValuePair<string, string>("Authorization", $"Basic {authString}");
+				return new AuthenticationHeaderValue(AuthenticationSchemes.Basic.ToString(), authString);
 			}
 		}
 	}

@@ -18,7 +18,7 @@ namespace bnet
 		private static ILogger _logger;
 
 		public static ClientSecret Secrets { internal get; set; } = null;
-		internal static KeyValuePair<string, string> Token { get { lock (_accessToken) { return _accessToken; } } }
+		internal static OAuthAccessToken Token { get { lock (_accessToken) { return _accessToken; } } }
 
 		private static OAuthAccessToken _accessToken = null;
 		private static Task _accessTokenRenewal = null;
@@ -96,6 +96,12 @@ namespace bnet
 		public static async Task<bool> RenewOAuthTokenNowAsync()
 		{
 			var newToken = await Get.AccessToken(Secrets);
+
+			if (newToken == null || newToken.Result == null)
+			{
+				// issue getting token
+				return false;
+			}
 
 			if (newToken.Result.Valid == false)
 			{
