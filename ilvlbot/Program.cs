@@ -27,6 +27,14 @@ namespace ilvlbot
 			Settings settings = new Settings("settings.conf");
 			ILogger logger = new ConsoleLogger();
 
+			// make sure api keys are set.
+			if (settings.ApiKeys.KeysSet == false)
+			{
+				logger.Log(Tag, "With no missing API keys, the can't run.\nPress any key to exit.");
+				Console.ReadKey();
+				Environment.Exit(-1);
+			}
+
 			// add settings/logger to di
 			services.AddSingleton(settings);
 			services.AddSingleton(logger);
