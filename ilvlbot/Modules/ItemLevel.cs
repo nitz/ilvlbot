@@ -403,7 +403,8 @@ namespace ilvlbot.Modules
 				// close the code block.
 				sb.AppendLine("```");
 
-				sb.AppendLine($"It took me {sw.Elapsed.TotalSeconds:0} seconds to look everyone up.");
+				var secondsS = (int)sw.Elapsed.TotalSeconds != 1 ? "s" : "";
+				sb.AppendLine($"It took me {sw.Elapsed.TotalSeconds:0} second{secondsS} to look everyone up.");
 
 				// build a nice embed to wrap it all up in.
 				EmbedFooterBuilder efb = new EmbedFooterBuilder()
