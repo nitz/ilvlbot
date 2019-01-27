@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <AssemblyName>ilvlbot</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>ilvlbot</PackageId>
