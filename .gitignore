@@ -1,6 +1,8 @@
 /.vs
 /bnet/obj
 /bnet/bin
+/core/obj
+/core/bin
 /ilvlbot/bin
 /ilvlbot/obj
 /ilvlbot/publish

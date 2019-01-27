@@ -49,7 +49,7 @@ namespace bnet.Networking.Http
 
 				if (status != HttpStatusCode.OK)
 				{
-					//Console.WriteLine($"[BNET]: {Scrub(request)}");
+					//Api.Log($"Request: {Scrub(request)}");
 
 					HttpResponseMessage resp = null;
 
@@ -95,21 +95,21 @@ namespace bnet.Networking.Http
 				}
 				else
 				{
-					Console.WriteLine($"[BNET]: Error ({status}): {response_text}");
+					Api.Log($"Error ({status}): {response_text}");
 					return new RequestResult<T>(response_text, status, null);
 				}
 			}
 			catch (WebException wex)
 			{
-				string failure = $"[BNET]: WebException for request: {Scrub(request)}\r\nReason: {wex.Message}";
-				Console.WriteLine(failure);
+				string failure = $"WebException for request: {Scrub(request)}\r\nReason: {wex.Message}";
+				Api.Log(failure);
 				HttpStatusCode status = (wex.Response is HttpWebResponse) ? (wex.Response as HttpWebResponse).StatusCode : HttpStatusCode.BadRequest;
 				return new RequestResult<T>(failure, status, wex);
 			}
 			catch (Exception ex)
 			{
-				string failure = $"[BNET]: Exception for request: {Scrub(request)}\r\nReason: {ex.Message}";
-				Console.WriteLine(failure);
+				string failure = $"Exception for request: {Scrub(request)}\r\nReason: {ex.Message}";
+				Api.Log(failure);
 				return new RequestResult<T>(failure, HttpStatusCode.BadRequest, ex);
 			}
 		}

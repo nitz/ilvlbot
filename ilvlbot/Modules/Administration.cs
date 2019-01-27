@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord.WebSocket;
+using ilvlbot.Services.Configuration;
 
 namespace ilvlbot.Modules
 {
@@ -15,13 +16,24 @@ namespace ilvlbot.Modules
 	[RequiredAccessLevel(AccessLevel.BotOwner)]
 	public class Administration : ModuleBase<SocketCommandContext>
 	{
+		private Settings _settings;
+
+		/// <summary>
+		/// Constructor to grab the program settings from DI.
+		/// </summary>
+		/// <param name="settings">The program's settings.</param>
+		public Administration(Settings settings)
+		{
+			_settings = settings;
+		}
+
 		[Command("link"), Alias("invite", "invitelink")]
 		[Remarks("Has the bot private message you the link to invite him to a server.")]
 		[Summary("Has the bot private message you the link to invite him to a server.")]
 		[RequiredAccessLevel(AccessLevel.BotOwner)]
 		public async Task GetInviteLink()
 		{
-			string link = $"https://discordapp.com/oauth2/authorize?client_id={Program.Settings.ApiKeys.Discord.ClientId}&scope=bot&permissions=0";
+			string link = $"https://discordapp.com/oauth2/authorize?client_id={_settings.ApiKeys.Discord.ClientId}&scope=bot&permissions=0";
 			string message = $"Hey, my invite link is {link}\nThe person who uses this link must have the `Manage Server` role to add me!";
 			var dmc = await Context.User.GetOrCreateDMChannelAsync();
 			await dmc.SendMessageAsync(message);

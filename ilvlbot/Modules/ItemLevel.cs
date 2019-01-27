@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using bnet.Requests;
+using bnet.Responses;
+using core.Services.Logging;
+using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
+using ilvlbot.Services.Configuration;
 using ilvlbot.Extensions;
+using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using Discord.Commands;
-using bnet.Responses;
-using bnet.Requests;
-using Discord;
-using ilvlbot.Access;
-using System.Linq;
-using Discord.WebSocket;
 
 namespace ilvlbot.Modules
 {
@@ -58,6 +58,26 @@ namespace ilvlbot.Modules
 		private static Dictionary<string, GuildInfo> info = new Dictionary<string, GuildInfo>();
 
 		/// <summary>
+		/// Item Level Bot specific settings
+		/// </summary>
+		private ItemLevelBotConfig _config;
+
+		/// <summary>
+		/// A logger.
+		/// </summary>
+		private ILogger _logger;
+
+		/// <summary>
+		/// Constructor to grab the program settings from DI.
+		/// </summary>
+		/// <param name="settings">The program's settings.</param>
+		public ItemLevel(Settings settings, ILogger logger)
+		{
+			_config = settings.ItemLevel;
+			_logger = logger;
+		}
+
+		/// <summary>
 		/// Just a simple wrapper for this class to dump to the console.
 		/// </summary>
 		/// <param name="s">The text to output.</param>
@@ -70,7 +90,7 @@ namespace ilvlbot.Modules
 			if (Context.Message.Channel is SocketGuildChannel sgc)
 				chan = $"{sgc.Guild.Name}#{chan}";
 
-			Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] [ILVL] [Req:{chan}/{Context.Message.Author.Username}#{Context.Message.Author.Discriminator}]: {msg}{s}");
+			_logger.Log("ilvl", $"[Req:{chan}/{Context.Message.Author.Username}#{Context.Message.Author.Discriminator}]: {msg}{s}");
 		}
 
 		/// <summary>
@@ -85,7 +105,7 @@ namespace ilvlbot.Modules
 		{
 			try
 			{
-				var cmd = ParsedCommand.Parse(character, Program.Settings.ItemLevel.DefaultRealm, string.Empty);
+				var cmd = ParsedCommand.Parse(character, _config.DefaultRealm, string.Empty);
 				var output = await ProcessCharacterCommand(cmd);
 
 				if (output.IsEmbedResult)
@@ -113,7 +133,7 @@ namespace ilvlbot.Modules
 		{
 			try
 			{
-				var cmd = ParsedCommand.Parse(guild, Program.Settings.ItemLevel.DefaultRealm, Program.Settings.ItemLevel.DefaultGuild);
+				var cmd = ParsedCommand.Parse(guild, _config.DefaultRealm, _config.DefaultGuild);
 				var output = await ProcessGuildCommand(cmd);
 
 				if (output.IsEmbedResult)
@@ -206,7 +226,7 @@ namespace ilvlbot.Modules
 			List<EmbedFieldBuilder> ach_fields = new List<EmbedFieldBuilder>();
 
 			// check achievements
-			foreach (int achi_id in Program.Settings.ItemLevel.CheckedAchievements)
+			foreach (int achi_id in _config.CheckedAchievements)
 			{
 				try
 				{
@@ -282,10 +302,10 @@ namespace ilvlbot.Modules
 		/// which will have either a string to reply to the channel with, or an Embed to send to the channel.</returns>
 		private async Task<CommandResult> ProcessGuildCommand(ParsedCommand cmd)
 		{
-			GuildInfo g = GetGuild(cmd.RealmName, cmd.TargetName, Program.Settings.ItemLevel.GuildTargetLevel);
+			GuildInfo g = GetGuild(cmd.RealmName, cmd.TargetName, _config.GuildTargetLevel);
 			TimeSpan time_since_update = DateTime.Now - g.LastRefresh;
 
-			if (time_since_update > Program.Settings.ItemLevel.GuildRequestCooldown)
+			if (time_since_update > _config.GuildRequestCooldown)
 			{
 				Log($"ProcessGuildCommand: `{cmd.RealmName}/{cmd.TargetName}`");
 				var holdOnMessage = await ReplyAsync($"Okay, give me a few. Looking up `{cmd.TargetName}` on `{cmd.RealmName}` now.");
@@ -307,7 +327,7 @@ namespace ilvlbot.Modules
 			}
 			else
 			{
-				TimeSpan cooldown_left = Program.Settings.ItemLevel.GuildRequestCooldown - time_since_update;
+				TimeSpan cooldown_left = _config.GuildRequestCooldown - time_since_update;
 
 				// give em a lazy reason.
 				string output = $"{lazyReasons.GetRandom()} (cooldown remaining: {cooldown_left:mm\\:ss})";
@@ -343,7 +363,7 @@ namespace ilvlbot.Modules
 					return new CommandResult(sb.ToString());
 				}
 
-				int number_shown = Math.Min(guild.GuildMembers.Count, Program.Settings.ItemLevel.MaxGuildCharacters);
+				int number_shown = Math.Min(guild.GuildMembers.Count, _config.MaxGuildCharacters);
 
 				sb.AppendLine($"Here's the top {number_shown} ('in bags' ilvl in parenthesis)");
 
@@ -365,7 +385,7 @@ namespace ilvlbot.Modules
 					sb.AppendLine($"{c.character.items.calculatedItemLevel:0.00} ({c.character.items.averageItemLevel}) :: {c.guildCharacter.name}");
 
 					++count;
-					if (count >= Program.Settings.ItemLevel.MaxGuildCharacters)
+					if (count >= _config.MaxGuildCharacters)
 						break;
 				}
 

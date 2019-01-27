@@ -1,39 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using bnet;
+using core.Services.Logging;
+using ilvlbot.Services.Configuration;
+using ilvlbot.Services.Logging;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Threading.Tasks;
-using bnet;
-using Discord;
 
 namespace ilvlbot
 {
 	class Program
 	{
-		private static void Main(string[] args) => new Program().Start(args).GetAwaiter().GetResult();
+		private const string Tag = "main";
 
-		internal static Configuration.Settings Settings;
-		internal static DiscordBot Bot;
+		public static IServiceProvider Services;
 		internal static int apiInitRetrySeconds = 3;
 
-		static Program()
-		{
-			Settings = Configuration.Settings.Load("settings.conf");
-		}
-
-		private async Task Start(string[] args)
+		private static async Task Main(string[] args)
 		{
 			// set window title.
 			Console.Title = System.Reflection.Assembly.GetExecutingAssembly().FullName;
 
+			// init di
+			var services = new ServiceCollection();
+
+			// load settings, logger
+			Settings settings = new Settings("settings.conf");
+			ILogger logger = new ConsoleLogger();
+
+			// add settings/logger to di
+			services.AddSingleton(settings);
+			services.AddSingleton(logger);
+
 			// init discord
-			Bot = new DiscordBot();
+			var bot = new DiscordBot();
+			bot.ConfigureServices(services);
+			services.AddSingleton(bot);
+
+			// build service provider!
+			Services = services.BuildServiceProvider();
 
 			// init bnet
-			while (Api.Initialize(Settings.ApiKeys.BattleNet, Bot.Log) == false)
+			while (Api.Initialize(settings.ApiKeys.BattleNet, Services) == false)
 			{
 				// failed to initialize the bnet api, wait a few seconds and retry.
-				Log($"Failed to initialize Battle.net API, waiting {apiInitRetrySeconds} seconds before retrying...");
+				logger.Log(Tag, $"Failed to initialize Battle.net API, waiting {apiInitRetrySeconds} seconds before retrying...");
 				await Task.Delay(TimeSpan.FromSeconds(apiInitRetrySeconds));
 			}
 
@@ -41,17 +51,13 @@ namespace ilvlbot
 			Console.CancelKeyPress += Console_CancelKeyPress;
 
 			// run the bot!
-			await Bot.Run();
+			await bot.Run(Services);
 		}
 
 		private static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
 		{
-			Bot?.Shutdown().GetAwaiter().GetResult();
-		}
-
-		private void Log(string s)
-		{
-			Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] [GLOBAL] {s}");
+			Services.GetService<ILogger>()?.Log(Tag, "Console cancel key press received.");
+			Services.GetService<DiscordBot>()?.Shutdown().Wait();
 		}
 	}
 }

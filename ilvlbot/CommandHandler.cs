@@ -4,17 +4,19 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System;
 using Microsoft.Extensions.DependencyInjection;
+using ilvlbot.Services.Configuration;
 
 namespace ilvlbot
 {
 	public class CommandHandler
 	{
+		private bool _initialized = false;
 		private CommandService _commands;
 		private DiscordSocketClient _client;
-		private IServiceCollection _serviceCollection;
 		private IServiceProvider _serviceProvider;
+		private Settings _settings;
 
-		public async Task Install(IServiceCollection serviceCollection)
+		public void ConfigureServices(IServiceCollection serviceCollection)
 		{
 			// Create Command Service, inject it into Dependency Map
 			CommandServiceConfig config = new CommandServiceConfig()
@@ -23,12 +25,20 @@ namespace ilvlbot
 			};
 
 			_commands = new CommandService(config);
-			
-			_serviceCollection = serviceCollection;
-			_serviceCollection.AddSingleton(_commands);
+			serviceCollection.AddSingleton(_commands);
+		}
 
-			// build the service provider
-			_serviceProvider = _serviceCollection.BuildServiceProvider();
+		public async Task InitializeCommandModulesAsync(IServiceProvider provider)
+		{
+			if (_initialized)
+			{
+				return;
+			}
+
+			_initialized = true;
+
+			// grab the service provider
+			_serviceProvider = provider;
 
 			// load all the command modules
 			await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _serviceProvider);
@@ -36,6 +46,9 @@ namespace ilvlbot
 			// subscribe to the incoming message
 			_client = _serviceProvider.GetService(typeof(DiscordSocketClient)) as DiscordSocketClient;
 			_client.MessageReceived += HandleCommand;
+
+			// grab settings
+			_settings = _serviceProvider.GetService<Settings>();
 		}
 
 		public async Task HandleCommand(SocketMessage parameterMessage)
@@ -48,7 +61,7 @@ namespace ilvlbot
 			int argPos = 0;
 			// Determine if the message has a valid prefix, adjust argPos 
 			if (!(message.HasMentionPrefix(_client.CurrentUser, ref argPos) ||
-				message.HasStringPrefix(Program.Settings.Prefix, ref argPos))) return;
+				message.HasStringPrefix(_settings.Prefix, ref argPos))) return;
 
 			// Create a Command Context
 			var context = new SocketCommandContext(_client, message);

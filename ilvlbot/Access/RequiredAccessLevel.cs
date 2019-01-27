@@ -1,5 +1,7 @@
 ﻿using Discord.Commands;
 using Discord.WebSocket;
+using ilvlbot.Services.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,11 +18,12 @@ namespace ilvlbot.Access
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 	public class RequiredAccessLevelAttribute : PreconditionAttribute
 	{
-		private AccessLevel Level;
+		private AccessLevel _level;
+		private Settings _settings;
 
 		public RequiredAccessLevelAttribute(AccessLevel level)
 		{
-			Level = level;
+			_level = level;
 		}
 
 		public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider service)
@@ -28,8 +31,11 @@ namespace ilvlbot.Access
 			// Get the acccesslevel for this context
 			var access = GetAccessLevel(context);
 
+			// grab settings
+			_settings = service.GetService<Settings>();
+
 			// If the user's access level is greater than the required level, return success.
-			if (access >= Level)
+			if (access >= _level)
 				return Task.FromResult(PreconditionResult.FromSuccess());
 			else
 				return Task.FromResult(PreconditionResult.FromError("Insufficient permissions."));
@@ -42,7 +48,7 @@ namespace ilvlbot.Access
 				return AccessLevel.Blocked;
 
 			// Give configured owners special access.
-			if (Program.Settings.Owners.Contains(c.User.Id))
+			if (_settings.Owners.Contains(c.User.Id))
 				return AccessLevel.BotOwner;
 
 			// Check if the context is in a guild.

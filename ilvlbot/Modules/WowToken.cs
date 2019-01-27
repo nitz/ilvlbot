@@ -1,11 +1,13 @@
-﻿using System;
+﻿using bnet.Responses; // for the timestamp converter extension. should probably move that..
+using core.Services.Logging;
+using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
+using ilvlbot.Services.Configuration;
+using ilvlbot.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Discord;
-using ilvlbot.Extensions;
-using Discord.Commands;
-using bnet.Responses; // for the timestamp converter extension. should probably move that..
-using Discord.WebSocket;
 
 namespace ilvlbot.Modules
 {
@@ -15,19 +17,29 @@ namespace ilvlbot.Modules
 		private static readonly string wowEmoji = "wow".ToDiscordEmoji();
 		private static readonly string goldEmoji = "gold".ToDiscordEmoji();
 		private static readonly Color goldColor = new Color(217, 200, 107);
+		private Settings _settings;
+		private ILogger _logger;
 
 		private class Price
 		{
 			public string Symbol { get; }
 			public decimal Amount { get; }
 
-			public Price(string symbol, decimal amt)
+			public Price(string symbol, decimal amount)
 			{
 				Symbol = symbol;
-				Amount = amt;
+				Amount = amount;
+			}
+
+			public override string ToString()
+			{
+				return $"{Symbol}{Amount}";
 			}
 		}
 
+		/// <summary>
+		/// A mapping of regions to token prices.
+		/// </summary>
 		private readonly Dictionary<string, Price> regionToTokenPrice = new Dictionary<string, Price>()
 		{
 			{ "NA", new Price("$", 20m) },
@@ -37,6 +49,16 @@ namespace ilvlbot.Modules
 			{ "TW", new Price("NT$", 500m) },
 			{ "KR", new Price("₩", 22000m) },
 		};
+
+		/// <summary>
+		/// Constructor to grab the program settings from DI.
+		/// </summary>
+		/// <param name="settings">The program's settings.</param>
+		public WowToken(Settings settings, ILogger logger)
+		{
+			_settings = settings;
+			_logger = logger;
+		}
 
 		/// <summary>
 		/// Just a simple wrapper for this class to dump to the console.
@@ -51,7 +73,7 @@ namespace ilvlbot.Modules
 			if (Context.Message.Channel is SocketGuildChannel sgc)
 				chan = $"{sgc.Guild.Name}#{chan}";
 
-			Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] [TOKEN] [Req:{chan}/{Context.Message.Author.Username}#{Context.Message.Author.Discriminator}]: {msg}{s}");
+			_logger.Log("token", $"[Req:{chan}/{Context.Message.Author.Username}#{Context.Message.Author.Discriminator}]: {msg}{s}");
 		}
 
 		[Command("token"), Alias("wowtoken")]
@@ -61,7 +83,7 @@ namespace ilvlbot.Modules
 		{
 			if (string.IsNullOrEmpty(regionName))
 			{
-				regionName = Configuration.Settings.ItemLevelConfig.DefaultWowTokenRegion;
+				regionName = ItemLevelBotConfig.DefaultWowTokenRegion;
 				Log($"No region specified in request, using default region: `{regionName}`");
 			}
 			

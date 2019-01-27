@@ -1,6 +1,7 @@
-﻿using Discord;
-using Discord.Commands;
+﻿using core.Services.Logging;
+using Discord;
 using Discord.WebSocket;
+using ilvlbot.Services.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
@@ -9,50 +10,52 @@ namespace ilvlbot
 {
 	public class DiscordBot
 	{
+		private const string Tag = "bot";
+		private const string TagDiscord = "discord";
+
 		private DiscordSocketClient _client;
 		private CommandHandler _commands;
+		private ILogger _logger;
+		private Settings _settings;
 
 		public DiscordBot()
 		{
+			DiscordSocketConfig config = new DiscordSocketConfig()
+			{
+				LogLevel = LogSeverity.Info,
+			};
 
+			_client = new DiscordSocketClient(config);
 		}
 
-		public async Task Run()
+		public async Task Run(IServiceProvider services)
 		{
 			try
 			{
-				Log("Starting up...");
+				// grab services.
+				_logger = services.GetService<ILogger>();
+				_settings = services.GetService<Settings>();
 
-				DiscordSocketConfig config = new DiscordSocketConfig()
-				{
-					LogLevel = LogSeverity.Info,
-				};
+				_logger.Log(Tag, "Starting up...");
 
-				_client = new DiscordSocketClient(config);
-
-				_client.Log += Log;
+				_client.Log += DiscordLog;
 				_client.Ready += ClientOnReady;
 				_client.Connected += ClientOnConnected;
 
-				Log("Connecting...");
+				_logger.Log(Tag, "Connecting...");
 
-				await _client.LoginAsync(TokenType.Bot, Program.Settings.ApiKeys.Discord.Token);
+				await _client.LoginAsync(TokenType.Bot, _settings.ApiKeys.Discord.Token);
 				await _client.StartAsync();
 
-				// add ourself to our dependency mapper
-				var serviceCollection = new ServiceCollection();
-				serviceCollection.AddSingleton(_client);
-
-				// install our commands
-				_commands = new CommandHandler();
-				await _commands.Install(serviceCollection);
+				// install commands.
+				await _commands.InitializeCommandModulesAsync(services);
 
 				// hang out forever.
 				await Task.Delay(-1);
 			}
 			catch (System.Net.WebException wex)
 			{
-				Log($"DiscordBot.Run() failed: {wex.Message}");
+				_logger.Log(Tag, $"DiscordBot.Run() failed: {wex.Message}");
 			}
 		}
 
@@ -60,19 +63,27 @@ namespace ilvlbot
 
 		private Task ClientOnConnected()
 		{
-			Log($"[Connected] Connection: {_client.ConnectionState}, Login: {_client.LoginState}.");
+			_logger.Log(Tag, $"[Connected] Connection: {_client.ConnectionState}, Login: {_client.LoginState}.");
 			return Task.CompletedTask;
 		}
 
 		private Task ClientOnReady()
 		{
-			Log($"[Ready]");
+			_logger.Log(Tag, $"[Ready] Ready.");
 			return Task.CompletedTask;
 		}
 
-		private Task Log(LogMessage l)
+		private Task DiscordLog(LogMessage l)
 		{
-			Log($"[{l.Severity}:{l.Source}] {l.Message}");
+			if (l.Exception == null)
+			{
+				_logger.Log(TagDiscord, $"[{l.Severity}:{l.Source}] {l.Message}");
+			}
+			else
+			{
+				_logger.Log(TagDiscord, $"[!:{l.Exception.GetType().Name}] [{l.Severity}:{l.Source}] {l.Exception.Message}; {l.Message}");
+			}
+
 			return Task.CompletedTask;
 		}
 
@@ -82,7 +93,7 @@ namespace ilvlbot
 		{
 			if (_client != null && _client.ConnectionState == ConnectionState.Connected)
 			{
-				Log("Disconnecting...");
+				_logger.Log(Tag, "Shutting down...");
 				await _client.StopAsync();
 				_client = null;
 			}
@@ -91,15 +102,20 @@ namespace ilvlbot
 		public async Task SetGame(string game, string url = "")
 		{
 			await _client.SetGameAsync(game, url, ActivityType.Playing);
-			Log($"Game changed to {game} ({url}).");
+			_logger.Log(Tag, $"Game changed to {game} ({url}).");
 		}
 
-		internal void Log(string s)
+		public void ConfigureServices(IServiceCollection services)
 		{
-			Task.Run(() =>
+			// add ourself to our dependency mapper
+			services.AddSingleton(_client);
+
+			// create our command handler, and get it's services.
+			if (_commands == null)
 			{
-				Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] [BOT] {s}");
-			});
+				_commands = new CommandHandler();
+				_commands.ConfigureServices(services);
+			}
 		}
 	}
 }

@@ -3,6 +3,7 @@ using Discord.Commands;
 using System.Linq;
 using System.Threading.Tasks;
 using ilvlbot.Extensions;
+using ilvlbot.Services.Configuration;
 
 /// <summary>
 /// Adapted from https://github.com/Aux/Discord.Net-Example/blob/1.0/Discord.Net-Example/Modules/HelpModule.cs
@@ -13,11 +14,16 @@ namespace ilvlbot.Modules
 	public class Help : ModuleBase<SocketCommandContext>
 	{
 		private CommandService _service;
+		private Settings _settings;
 
-		// Create a constructor for the commandservice dependency
-		public Help(CommandService service)
+		/// <summary>
+		/// Constructor to grab the program settings from DI.
+		/// </summary>
+		/// <param name="settings">The program's settings.</param>
+		public Help(CommandService service, Settings settings)
 		{
 			_service = service;
+			_settings = settings;
 		}
 
 		[Command("help")]
@@ -33,7 +39,7 @@ namespace ilvlbot.Modules
 
 		public async Task HelpGeneral()
 		{
-			string prefix = Program.Settings.Prefix;
+			string prefix = _settings.Prefix;
 			var builder = new EmbedBuilder()
 			{
 				Color = new Color(114, 137, 218),
@@ -79,7 +85,7 @@ namespace ilvlbot.Modules
 				return;
 			}
 
-			string prefix = Program.Settings.Prefix;
+			string prefix = _settings.Prefix;
 			var builder = new EmbedBuilder()
 			{
 				Color = new Color(114, 137, 218),
@@ -135,7 +141,8 @@ namespace ilvlbot.Modules
 			var bd = AssemblyExtensions.CompileDate;
 			string built = bd.ToLongDateString() + " at " + bd.ToLongTimeString();
 			string discordnet = ($"v{DiscordConfig.Version} (API v{DiscordConfig.APIVersion}); ") + System.Reflection.Assembly.GetAssembly(Context.Client.GetType()).FullName;
-			string about = "v1.5: Added alternative server specification syntax for ilvl commands, gilvl ouput refreshed.\n" +
+			string about = "v1.6: Moved to .NET Core 2.2 (from .NET Framework 4.7.2), restructured DI." +
+							"v1.5: Added alternative server specification syntax for ilvl commands, gilvl ouput refreshed.\n" +
 							"v1.4: Bumped Discord.Net to 2.0.0.\n" +
 							"v1.3: Swapped to using new Blizzard API with OAuth.\n" +
 							"v1.2: Added support for Azerite items, removed artifact/legendary info. Fixed profile images.\n" +

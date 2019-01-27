@@ -42,7 +42,7 @@ namespace bnet
 				if (status != HttpStatusCode.OK)
 				{
 					//string printsafe_request = request.Replace(ApiKey.Key, "(removed)");
-					//Console.WriteLine($"[BNET]: {printsafe_request}");
+					//Api.Log($"Request: {printsafe_request}");
 					WebRequest req = WebRequest.CreateHttp(request);
 					HttpWebResponse resp = req.GetResponse() as HttpWebResponse;
 
@@ -67,21 +67,21 @@ namespace bnet
 				}
 				else
 				{
-					Console.WriteLine($"[BNET]: Error ({status}): {response_text}");
+					Api.Log($"Error ({status}): {response_text}");
 					return new HttpRequestResult<T>(response_text, status, null);
 				}
 			}
 			catch (WebException wex)
 			{
-				string failure = $"[BNET]: WebException for request: {Scrub(request)}\r\nReason: {wex.Message}";
-				Console.WriteLine(failure);
+				string failure = $"WebException for request: {Scrub(request)}\r\nReason: {wex.Message}";
+				Api.Log(failure);
 				HttpStatusCode status = (wex.Response is HttpWebResponse) ? (wex.Response as HttpWebResponse).StatusCode : HttpStatusCode.BadRequest;
 				return new HttpRequestResult<T>(failure, status, wex);
 			}
 			catch (Exception ex)
 			{
-				string failure = $"[BNET]: Exception for request: {Scrub(request)}\r\nReason: {ex.Message}";
-				Console.WriteLine(failure);
+				string failure = $"Exception for request: {Scrub(request)}\r\nReason: {ex.Message}";
+				Api.Log(failure);
 				return new HttpRequestResult<T>(failure, HttpStatusCode.BadRequest, ex);
 			}
 		}

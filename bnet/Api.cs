@@ -1,17 +1,23 @@
 ﻿using bnet.Requests;
 using bnet.Responses;
+using core.Services.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace bnet
 {
 	// todo -- actually see if someone has a fleshed out library so i'm not rolling my own ;)
 	public static partial class Api
 	{
+		internal const string Tag = "bnet";
+
+		private static IServiceProvider _services;
+		private static ILogger _logger;
+
 		public static ClientSecret Secrets { internal get; set; } = null;
-		internal static System.Action<string> Log { get; set; } = (s) => { };
 		internal static KeyValuePair<string, string> Token { get { lock (_accessToken) { return _accessToken; } } }
 
 		private static OAuthAccessToken _accessToken = null;
@@ -22,12 +28,15 @@ namespace bnet
 
 		private static readonly TimeSpan FullDelay = TimeSpan.FromMilliseconds(int.MaxValue);
 
-		public static bool Initialize(ClientSecret secrets, System.Action<string> log)
+		public static bool Initialize(ClientSecret secrets, IServiceProvider services)
 		{
 			// store key, generate invalid access token.
 			Secrets = secrets;
-			Log = log;
+			_services = services;
 			_accessToken = new OAuthAccessToken();
+
+			// grab services
+			_logger = _services.GetService<ILogger>();
 
 			try
 			{
@@ -124,6 +133,11 @@ namespace bnet
 
 				Task.Delay(delayFor, _accessTokenRenewalCancellation.Token).Wait();
 			}
+		}
+
+		internal static void Log(string msg)
+		{
+			_logger.Log(Tag, msg);
 		}
 	}
 }
