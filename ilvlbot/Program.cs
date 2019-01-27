@@ -12,6 +12,8 @@ namespace ilvlbot
 	{
 		private const string Tag = "main";
 
+		private const string SettingsFile = "settings.conf";
+
 		public static IServiceProvider Services;
 		internal static int apiInitRetrySeconds = 3;
 
@@ -24,13 +26,13 @@ namespace ilvlbot
 			var services = new ServiceCollection();
 
 			// load settings, logger
-			Settings settings = new Settings("settings.conf");
+			Settings settings = new Settings(SettingsFile);
 			ILogger logger = new ConsoleLogger();
 
 			// make sure api keys are set.
 			if (settings.ApiKeys.KeysSet == false)
 			{
-				logger.Log(Tag, "With no missing API keys, the can't run.\nPress any key to exit.");
+				logger.Log(Tag, "With missing API keys, the application can't run.\nPress any key to exit.");
 				Console.ReadKey();
 				Environment.Exit(-1);
 			}
