@@ -1,11 +1,10 @@
 ﻿using bnet.Requests;
 using bnet.Responses;
 using core.Services.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace bnet
 {

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace bnet.Networking.Http
 {
@@ -18,8 +15,7 @@ namespace bnet.Networking.Http
 
 		public bool TryGetCachedObject<T>(string key, out T value)
 		{
-			object o;
-			bool was_cached = cache.TryGetValue(key, out o);
+			bool was_cached = cache.TryGetValue(key, out object o);
 
 			if (was_cached && o != null && o is T)
 			{
@@ -31,7 +27,7 @@ namespace bnet.Networking.Http
 			}
 			else
 			{
-				value = default(T);
+				value = default;
 			}
 
 			return was_cached;

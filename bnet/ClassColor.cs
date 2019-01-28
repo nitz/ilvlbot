@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace bnet
 {
@@ -55,8 +51,7 @@ namespace bnet
 
 		public static implicit operator ClassColor(string name)
 		{
-			ClassColor result;
-			if (nameMap.TryGetValue(name.ToLower(), out result))
+			if (nameMap.TryGetValue(name.ToLower(), out ClassColor result))
 				return result;
 			else
 				return Unknown;
@@ -64,8 +59,7 @@ namespace bnet
 
 		public static implicit operator ClassColor(int id)
 		{
-			ClassColor result;
-			if (idMap.TryGetValue(id, out result))
+			if (idMap.TryGetValue(id, out ClassColor result))
 				return result;
 			else
 				return Unknown;

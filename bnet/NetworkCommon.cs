@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Text;
 
 namespace bnet
 {
@@ -44,9 +43,8 @@ namespace bnet
 					//string printsafe_request = request.Replace(ApiKey.Key, "(removed)");
 					//Api.Log($"Request: {printsafe_request}");
 					WebRequest req = WebRequest.CreateHttp(request);
-					HttpWebResponse resp = req.GetResponse() as HttpWebResponse;
 
-					if (resp == null)
+					if (!(req.GetResponse() is HttpWebResponse resp))
 						return null;
 
 					status = resp.StatusCode;

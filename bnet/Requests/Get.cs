@@ -1,7 +1,6 @@
-﻿using bnet.Responses;
-using bnet.Networking.Http;
+﻿using bnet.Networking.Http;
+using bnet.Responses;
 using System.Threading.Tasks;
-using System;
 
 namespace bnet.Requests
 {
@@ -40,8 +39,12 @@ namespace bnet.Requests
 		public static async Task<RequestResult<OAuthAccessToken>> AccessToken(Api.ClientSecret clientSecrets)
 		{
 			string req_string = string.Format(Strings.oAuthTokenFormat);
-			var requestContent = new System.Net.Http.MultipartFormDataContent();
-			requestContent.Add(new System.Net.Http.StringContent(Strings.oAuthTokenRequstValueGrantTypeClientCredentials), Strings.oAuthTokenRequstFieldGrantType);
+
+			var requestContent = new System.Net.Http.MultipartFormDataContent
+			{
+				{ new System.Net.Http.StringContent(Strings.oAuthTokenRequstValueGrantTypeClientCredentials), Strings.oAuthTokenRequstFieldGrantType }
+			};
+
 			return await Common.RequestAndDeserialize<OAuthAccessToken>(req_string, CacheMode.Uncached, requestContent, authenticatonHeader: clientSecrets);
 		}
 	}

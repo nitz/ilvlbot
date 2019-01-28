@@ -1,5 +1,5 @@
-﻿using System;
-using ilvlbot.Extensions;
+﻿using ilvlbot.Extensions;
+using System;
 
 namespace ilvlbot.Modules
 {

@@ -1,10 +1,10 @@
 ﻿using Discord.Commands;
 using Discord.WebSocket;
+using ilvlbot.Services.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Reflection;
 using System.Threading.Tasks;
-using System;
-using Microsoft.Extensions.DependencyInjection;
-using ilvlbot.Services.Configuration;
 
 namespace ilvlbot
 {

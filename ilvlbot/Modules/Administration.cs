@@ -1,12 +1,11 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using ilvlbot.Access;
+using ilvlbot.Services.Configuration;
 using System;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Discord.WebSocket;
-using ilvlbot.Services.Configuration;
 
 namespace ilvlbot.Modules
 {

@@ -1,5 +1,4 @@
-﻿using bnet;
-using bnet.Requests;
+﻿using bnet.Requests;
 using bnet.Responses;
 using System;
 using System.Collections.Generic;

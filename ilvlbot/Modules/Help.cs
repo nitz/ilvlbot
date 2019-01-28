@@ -1,10 +1,10 @@
 ﻿using Discord;
 using Discord.Commands;
-using System.Linq;
-using System.Threading.Tasks;
 using ilvlbot.Extensions;
 using ilvlbot.Services.Configuration;
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 /// <summary>
 /// Adapted from https://github.com/Aux/Discord.Net-Example/blob/1.0/Discord.Net-Example/Modules/HelpModule.cs
