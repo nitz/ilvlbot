@@ -28,11 +28,11 @@ namespace ilvlbot.Access
 
 		public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider service)
 		{
-			// Get the acccesslevel for this context
-			var access = GetAccessLevel(context);
-
 			// grab settings
 			_settings = service.GetService<Settings>();
+
+			// Get the acccesslevel for this context
+			var access = GetAccessLevel(context);
 
 			// If the user's access level is greater than the required level, return success.
 			if (access >= _level)
