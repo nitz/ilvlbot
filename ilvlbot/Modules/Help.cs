@@ -14,9 +14,9 @@ namespace ilvlbot.Modules
 	[Name("Help")]
 	public class Help : ModuleBase<SocketCommandContext>
 	{
-		private CommandService _commandService;
-		private Settings _settings;
-		private IServiceProvider _services;
+		private readonly CommandService _commandService;
+		private readonly Settings _settings;
+		private readonly IServiceProvider _services;
 
 		/// <summary>
 		/// The changelog values returned by the `changelog` commmand.

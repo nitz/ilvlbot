@@ -242,21 +242,25 @@ namespace ilvlbot.Modules
 			}
 
 			// build the 'author' as the player.
-			EmbedAuthorBuilder eab = new EmbedAuthorBuilder();
-			eab.Name = char_title;
-			eab.IconUrl = avatar_url;
-			eab.Url = armory_url;
+			var eab = new EmbedAuthorBuilder
+			{
+				Name = char_title,
+				IconUrl = avatar_url,
+				Url = armory_url
+			};
 
 			// buld the 'footer' as something funny
-			EmbedFooterBuilder efb = new EmbedFooterBuilder();
-			//efb.IconUrl = "https://us.battle.net/forums/static/images/avatars/wow/avatar-wow-default.png";
-			efb.Text = judgementalLines.GetRandom();
+			var efb = new EmbedFooterBuilder
+			{
+				//IconUrl = "https://us.battle.net/forums/static/images/avatars/wow/avatar-wow-default.png";
+				Text = judgementalLines.GetRandom()
+			};
 
 			// the last modified is (usually) the last time the character logged out of the game.
 			DateTimeOffset dto = DateTime.SpecifyKind(fc.lastModifiedDateTime, DateTimeKind.Local);
 
 			// build the Embed
-			EmbedBuilder builder = new EmbedBuilder()
+			var builder = new EmbedBuilder
 			{
 				// title/url for wowprogress
 				Title = wowprogress_title,
@@ -281,11 +285,11 @@ namespace ilvlbot.Modules
 			};
 
 			// add all the fields
-			if (reportItemLevel) builder.AddField(new EmbedFieldBuilder() { IsInline = true, Name = "Item Level", Value = ilvl });
-			if (reportAzeriteLevel) builder.AddField(new EmbedFieldBuilder() { IsInline = true, Name = "Azerite Level", Value = azerite_level });
-			if (reportArtifactLevel) builder.AddField(new EmbedFieldBuilder() { IsInline = true, Name = "Artifact Level", Value = artifact_level });
-			if (reportLegendaries) builder.AddField(new EmbedFieldBuilder() { IsInline = true, Name = "Legendaries", Value = legendary_equipped });
-			if (reportAchievementPoints) builder.AddField(new EmbedFieldBuilder() { IsInline = true, Name = "Achievement Points", Value = ach_points });
+			if (reportItemLevel) builder.AddField(new EmbedFieldBuilder { IsInline = true, Name = "Item Level", Value = ilvl });
+			if (reportAzeriteLevel) builder.AddField(new EmbedFieldBuilder { IsInline = true, Name = "Azerite Level", Value = azerite_level });
+			if (reportArtifactLevel) builder.AddField(new EmbedFieldBuilder { IsInline = true, Name = "Artifact Level", Value = artifact_level });
+			if (reportLegendaries) builder.AddField(new EmbedFieldBuilder { IsInline = true, Name = "Legendaries", Value = legendary_equipped });
+			if (reportAchievementPoints) builder.AddField(new EmbedFieldBuilder { IsInline = true, Name = "Achievement Points", Value = ach_points });
 
 			// and the acheivement fields
 			foreach (var b in ach_fields)

@@ -72,9 +72,9 @@ namespace ilvlbot.Extensions
 		/// Retrieves the linker timestamp.
 		/// </summary>
 		/// <param name="filePath">The file path.</param>
-		/// <returns></returns>
+		/// <returns>The linker timestamp</returns>
 		/// <remarks>http://www.codinghorror.com/blog/2005/04/determining-build-date-the-hard-way.html</remarks>
-		private static System.DateTime RetrieveLinkerTimestamp(string filePath)
+		private static DateTime RetrieveLinkerTimestamp(string filePath)
 		{
 			const int peHeaderOffset = 60;
 			const int linkerTimestampOffset = 8;
@@ -90,7 +90,7 @@ namespace ilvlbot.Extensions
 				if (s != null)
 					s.Close();
 			}
-			var dt = new System.DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(System.BitConverter.ToInt32(b, System.BitConverter.ToInt32(b, peHeaderOffset) + linkerTimestampOffset));
+			var dt = new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(System.BitConverter.ToInt32(b, System.BitConverter.ToInt32(b, peHeaderOffset) + linkerTimestampOffset));
 			return dt.AddHours(TimeZoneInfo.Local.GetUtcOffset(dt).Hours);
 		}
 	}

@@ -2,7 +2,6 @@
 using Discord.Commands;
 using ilvlbot.Access;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -67,7 +66,7 @@ namespace ilvlbot.Modules
 			Log($"SetPlaying: {game}");
 			await Context.Client.SetGameAsync(game, null, ActivityType.Playing);
 		}
-
+		
 		[Command("oauth"), Alias("auth", "authentication")]
 		[Remarks("Gets information about the current bnet authentication.")]
 		[Summary("Gets information about the current bnet authentication.")]
@@ -75,7 +74,7 @@ namespace ilvlbot.Modules
 		{
 			await ReplyAsync(GetOAuthTokenOutputString().ToString());
 		}
-
+		
 		[Command("oauthrenew"), Alias("renewoauth")]
 		[Remarks("Forces a renew of the the OAuth token, if possible.")]
 		[Summary("Forces a renew of the the OAuth token, if possible.")]
@@ -87,7 +86,7 @@ namespace ilvlbot.Modules
 			{
 				var output = new StringBuilder();
 				output.AppendLine("OAuth token renewed.");
-				output.AppendLine(GetOAuthTokenOutputString().ToString());
+				output.AppendLine(GetOAuthTokenOutputString());
 				await ReplyAsync(output.ToString());
 			}
 			else
@@ -96,16 +95,20 @@ namespace ilvlbot.Modules
 			}
 		}
 
-		private StringBuilder GetOAuthTokenOutputString()
+		/// <summary>
+		/// Gets information about the current OAuth info.
+		/// </summary>
+		/// <returns>A string representing the current authorization info.</returns>
+		private string GetOAuthTokenOutputString()
 		{
-			var oauthInfo = bnet.Api.GetCurrentOAuthInfo();
+			var (tokenSlice, createdAt, expiresAt) = bnet.Api.GetCurrentOAuthInfo();
 			var output = new StringBuilder();
-			output.AppendLine("Authentication information: ```");
-			output.AppendLine($"Token Slice: {oauthInfo.TokenSlice}");
-			output.AppendLine($"Aquired: {oauthInfo.CreatedAt}");
-			output.AppendLine($"Expires: {oauthInfo.ExpiresAt}");
+			output.AppendLine("Authorization information: ```");
+			output.AppendLine($"Token Slice: {tokenSlice}");
+			output.AppendLine($"Aquired: {createdAt}");
+			output.AppendLine($"Expires: {expiresAt}");
 			output.Append("```");
-			return output;
+			return output.ToString();
 		}
 
 		/// <summary>
@@ -123,76 +126,5 @@ namespace ilvlbot.Modules
 
 			Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] [ADMIN] [Req:{chan}/{Context.Message.Author.Username}#{Context.Message.Author.Discriminator}]: {msg}{s}");
 		}
-
-		#region Sandbox testing things... can all be removed.
-
-		[Command("permissions"), Alias("roles")]
-		[RequiredAccessLevel(AccessLevel.BotOwner)]
-		[Disabled]
-		public async Task TestRoles([Remainder]string username = "")
-		{
-			string result = string.Empty;
-
-			if (string.IsNullOrEmpty(username))
-				username = Context.User.Username;
-
-			var permissions = (Context.User as Discord.WebSocket.SocketGuildUser)?.GetPermissions(Context.Channel as IGuildChannel);
-			result += $"{username}'s permissions: {permissions}\n";
-			var user = (Context.Guild.Users.FirstOrDefault(x => x.Username == username));
-
-			result += string.Join(", ", user?.Roles?.Where(x => x?.Name != "@everyone").Select(r => r?.Name) ?? new string[] {});
-
-			await ReplyAsync(result);
-		}
-
-		[Command("params")]
-		[Disabled]
-		public async Task TestParamSplitting(string part1, string part2, int number, [Remainder]string whatsleft = "")
-		{
-			await ReplyAsync($"Part 1: {part1}\nPart 2: {part2}\nA number: {number}\nWhat's left: {whatsleft}");
-		}
-
-		[Command("overloaded")]
-		[Disabled]
-		public async Task OverloadedCommand(string test)
-		{
-			await ReplyAsync($"string {test}");
-		}
-
-		[Command("overloaded")]
-		[Disabled]
-		public async Task OverloadedCommand(int test)
-		{
-			await ReplyAsync($"int {test}");
-		}
-
-		[Command("long")]
-		[Disabled]
-		public async Task TestLongRunningCommand()
-		{
-			var task = Task.Run(async () =>
-			{
-				await Task.Delay(5000);
-				await ReplyAsync($"It's been five seconds.");
-				await Task.Delay(5000);
-				await ReplyAsync($"It's been five more.");
-			});
-
-			await ReplyAsync($"Okay: gonna do some waiting!");
-		}
-
-		[Group("subs")]
-		[Disabled]
-		class Subgroup : ModuleBase<SocketCommandContext>
-		{
-			[Command("test"), Alias("test")]
-			[Disabled]
-			public async Task TestSubgroup([Remainder]string username = "")
-			{
-				await ReplyAsync("", embed: new EmbedBuilder().WithDescription("testing.").Build());
-			}
-		}
-
-		#endregion Sandbox
 	}
 }

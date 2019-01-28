@@ -18,7 +18,7 @@ namespace ilvlbot.Access
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 	public class RequiredAccessLevelAttribute : PreconditionAttribute
 	{
-		private AccessLevel _level;
+		private readonly AccessLevel _level;
 		private Settings _settings;
 
 		public RequiredAccessLevelAttribute(AccessLevel level)
@@ -52,8 +52,7 @@ namespace ilvlbot.Access
 				return AccessLevel.BotOwner;
 
 			// Check if the context is in a guild.
-			var user = c.User as SocketGuildUser;
-			if (user != null)
+			if (c.User is SocketGuildUser user)
 			{
 				// Check if the user is the guild owner.
 				if (c.Guild.OwnerId == user.Id)

@@ -54,14 +54,19 @@ namespace ilvlbot
 		public async Task HandleCommand(SocketMessage parameterMessage)
 		{
 			// Don't handle the command if it is a system message
-			var message = parameterMessage as SocketUserMessage;
-			if (message == null) return;
+			if (!(parameterMessage is SocketUserMessage message))
+			{
+				return;
+			}
 
 			// Mark where the prefix ends and the command begins
 			int argPos = 0;
 			// Determine if the message has a valid prefix, adjust argPos 
 			if (!(message.HasMentionPrefix(_client.CurrentUser, ref argPos) ||
-				message.HasStringPrefix(_settings.Prefix, ref argPos))) return;
+				message.HasStringPrefix(_settings.Prefix, ref argPos)))
+			{
+				return;
+			}
 
 			// Create a Command Context
 			var context = new SocketCommandContext(_client, message);
