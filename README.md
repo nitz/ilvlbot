@@ -3,7 +3,10 @@ A Discord bot that fetches World of Warcraft character info: item level, azerite
 
 ## Prerequisites
 
-I've built this with vs15 and try to stay up with patches. It's built with .NET Core 2.2. You'll need the .NET Core 2.2 SDK installed. As of writing, it doesn't seem to come as a component in the msvs installer, and instead is installed seperatedly from [Microsoft's Site](https://dotnet.microsoft.com/download).
+* Visual Studio 15.9 or later.
+* .NET Core 2.2 SDK
+
+I build with vs15 and try to stay up with patches. It's built with .NET Core 2.2, which is supported by vs15.9 or later. You'll also need the .NET Core 2.2 SDK installed. As of writing, it doesn't seem to come as a component in the msvs installer, and instead is installed seperatedly from [Microsoft's Site](https://dotnet.microsoft.com/download). The ".NET Core cross-platform development" workload does install .NET Core 2.1 and some tooling, but 2.2 still needs to be seperately installed for now.
 
 ## Building
 
