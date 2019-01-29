@@ -66,9 +66,9 @@ namespace ilvlbot.Modules
 			await Context.Client.SetGameAsync(game, null, ActivityType.Playing);
 		}
 		
-		[Command("oauth"), Alias("auth", "authentication")]
-		[Remarks("Gets information about the current bnet authentication.")]
-		[Summary("Gets information about the current bnet authentication.")]
+		[Command("oauth"), Alias("auth", "authentication ")]
+		[Remarks("Gets information about the current bnet authentication .")]
+		[Summary("Gets information about the current bnet authentication .")]
 		public async Task GetOAuthInfo()
 		{
 			await ReplyAsync(GetOAuthTokenOutputString().ToString());
