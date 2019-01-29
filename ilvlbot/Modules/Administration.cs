@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using core.Services.Logging;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using ilvlbot.Access;
@@ -14,20 +15,23 @@ namespace ilvlbot.Modules
 	[RequiredAccessLevel(AccessLevel.BotOwner)]
 	public class Administration : ModuleBase<SocketCommandContext>
 	{
-		private Settings _settings;
+		private const string Tag = "admin";
+		private readonly Settings _settings;
+		private readonly ILogger _logger;
 
 		/// <summary>
 		/// Constructor to grab the program settings from DI.
 		/// </summary>
 		/// <param name="settings">The program's settings.</param>
-		public Administration(Settings settings)
+		public Administration(Settings settings, ILogger logger)
 		{
 			_settings = settings;
+			_logger = logger;
 		}
 
 		[Command("link"), Alias("invite", "invitelink")]
-		[Remarks("Has the bot private message you the link to invite him to a server.")]
 		[Summary("Has the bot private message you the link to invite him to a server.")]
+		[Remarks("Has the bot private message you the link to invite him to a server.")]
 		[RequiredAccessLevel(AccessLevel.BotOwner)]
 		public async Task GetInviteLink()
 		{
@@ -57,8 +61,8 @@ namespace ilvlbot.Modules
 		}
 
 		[Command("playing"), Alias("game")]
-		[Remarks("Changes the 'game' that the bot is playing.")]
 		[Summary("Changes the 'game' that the bot is playing.")]
+		[Remarks("Changes the 'game' that the bot is playing.")]
 		[RequiredAccessLevel(AccessLevel.BotOwner)]
 		public async Task SetPlaying([Remainder]string game)
 		{
@@ -66,23 +70,31 @@ namespace ilvlbot.Modules
 			await Context.Client.SetGameAsync(game, null, ActivityType.Playing);
 		}
 		
-		[Command("oauth"), Alias("auth", "authentication ")]
-		[Remarks("Gets information about the current bnet authentication .")]
-		[Summary("Gets information about the current bnet authentication .")]
+		[Command("oauth"), Alias("auth", "authorization")]
+		[Summary("Gets information about the current bnet authorization.")]
+		[Remarks("Will show when the token was aquired, and when it expires, as well as a small slice of it. " +
+			"Since this can reveal potentially sensative information, it's only usable in DM.")]
+		[RequireContext(ContextType.DM)]
+		[RequiredAccessLevel(AccessLevel.BotOwner)]
 		public async Task GetOAuthInfo()
 		{
+			Log("GetOAuthInfo");
 			await ReplyAsync(GetOAuthTokenOutputString().ToString());
 		}
 		
 		[Command("oauthrenew"), Alias("renewoauth")]
-		[Remarks("Forces a renew of the the OAuth token, if possible.")]
 		[Summary("Forces a renew of the the OAuth token, if possible.")]
+		[Remarks("Will attempt to renew the OAuth token, then display information about it. " +
+			"Since this can reveal potentially sensative information, it's only usable in DM.")]
+		[RequireContext(ContextType.DM)]
+		[RequiredAccessLevel(AccessLevel.BotOwner)]
 		public async Task GetNewOAuthToken()
 		{
 			bool renewed = await bnet.Api.RenewOAuthTokenNowAsync();
 
 			if (renewed)
 			{
+				Log("Renewed OAuth token.");
 				var output = new StringBuilder();
 				output.AppendLine("OAuth token renewed.");
 				output.AppendLine(GetOAuthTokenOutputString());
@@ -90,6 +102,7 @@ namespace ilvlbot.Modules
 			}
 			else
 			{
+				Log("Failed to renew OAuth token.");
 				await ReplyAsync("Failed to renew OAuth token.");
 			}
 		}
@@ -123,7 +136,7 @@ namespace ilvlbot.Modules
 			if (Context.Message.Channel is SocketGuildChannel sgc)
 				chan = $"{sgc.Guild.Name}#{chan}";
 
-			Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] [ADMIN] [Req:{chan}/{Context.Message.Author.Username}#{Context.Message.Author.Discriminator}]: {msg}{s}");
+			_logger.Log(Tag, $"[Req:{chan}/{Context.Message.Author.Username}#{Context.Message.Author.Discriminator}]: {msg}{s}");
 		}
 	}
 }
