@@ -18,12 +18,14 @@ namespace ilvlbot.Access
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 	public class RequiredAccessLevelAttribute : PreconditionAttribute
 	{
-		private readonly AccessLevel _level;
+		private readonly AccessLevel _requiredLevel;
 		private Settings _settings;
 
-		public RequiredAccessLevelAttribute(AccessLevel level)
+		public override string ErrorMessage { get; set; }
+
+		public RequiredAccessLevelAttribute(AccessLevel requiredLevel)
 		{
-			_level = level;
+			_requiredLevel = requiredLevel;
 		}
 
 		public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider service)
@@ -32,13 +34,17 @@ namespace ilvlbot.Access
 			_settings = service.GetService<Settings>();
 
 			// Get the acccesslevel for this context
-			var access = GetAccessLevel(context);
+			var contextAccessLevel = GetAccessLevel(context);
 
 			// If the user's access level is greater than the required level, return success.
-			if (access >= _level)
+			if (contextAccessLevel >= _requiredLevel)
+			{
 				return Task.FromResult(PreconditionResult.FromSuccess());
+			}
 			else
-				return Task.FromResult(PreconditionResult.FromError("Insufficient permissions."));
+			{
+				return Task.FromResult(PreconditionResult.FromError(ErrorMessage ?? $"Insufficient permissions. Your access level is {contextAccessLevel}, requires {_requiredLevel}."));
+			}
 		}
 
 		public AccessLevel GetAccessLevel(ICommandContext c)
