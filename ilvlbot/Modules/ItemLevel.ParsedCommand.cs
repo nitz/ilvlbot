@@ -1,5 +1,6 @@
 ﻿using ilvlbot.Extensions;
 using System;
+using System.Linq;
 
 namespace ilvlbot.Modules
 {
@@ -56,25 +57,34 @@ namespace ilvlbot.Modules
 
 			private static string[] SplitsByPotentialSyntax(string val)
 			{
+				string[] res = null;
+
 				if (val.Contains("/"))
 				{
 					// eg "My Realm/My Guild"
 					// traditional full syntax, split on the slash.
-					return val.Split(new char[] { '/' }, 2);
+					res = val.Split(new char[] { '/' }, 2);
 				}
-				else if (val.StartsWith("\"") && val.EndsWith("\"") && val.Contains("-"))
+				else if (val.Contains("-"))
 				{
 					// eg: "My Guild-My Realm"
-					// alternative, full-quoted syntax. remove quotes and split by hyphen.
+					// alternative, reversed and hyphenated syntax. split by hyphen,
 					// then flip the array because the realm comes second in this syntax.
-					var res = val.Trim(new[] { '"' }).Split(new[] { '-' }, 2);
+					res = val.Trim(new[] { '"' }).Split(new[] { '-' }, 2);
 					Array.Reverse(res);
 					return res;
 				}
+				else
+				{
+					// no realm syntax,assume it's just a guild/character name,
+					// allow the default to be used for realm.
+					res = new[] { val };
+				}
 
-				// no slash or dash, assume it's just a guild/character name,
-				// allow the default to be used for realm.
-				return new[] { val };
+				// remove quotes
+				res = res.Select(v => v.Trim('"')).ToArray();
+
+				return res;
 			}
 		}
 	}
