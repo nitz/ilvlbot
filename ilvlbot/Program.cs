@@ -4,18 +4,19 @@ using ilvlbot.Services.Configuration;
 using ilvlbot.Services.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ilvlbot
 {
 	class Program
 	{
-		private const string Tag = "main";
-
-		private const string SettingsFile = "settings.conf";
-
-		public static IServiceProvider Services;
+		internal static IServiceProvider Services;
 		internal static int apiInitRetrySeconds = 3;
+
+		private const string Tag = "main";
+		private const string SettingsFile = "settings.conf";
+		private static readonly CancellationTokenSource botCancellationTokenSource = new CancellationTokenSource();
 
 		private static async Task Main(string[] args)
 		{
@@ -50,7 +51,7 @@ namespace ilvlbot
 			Services = services.BuildServiceProvider();
 
 			// init bnet
-			while (Api.Initialize(settings.ApiKeys.BattleNet, Services) == false)
+			while (await Api.InitializeAsync(settings.ApiKeys.BattleNet, Services) == false)
 			{
 				// failed to initialize the bnet api, wait a few seconds and retry.
 				logger.Log(Tag, $"Failed to initialize Battle.net API, waiting {apiInitRetrySeconds} seconds before retrying...");
@@ -61,13 +62,20 @@ namespace ilvlbot
 			Console.CancelKeyPress += Console_CancelKeyPress;
 
 			// run the bot!
-			await bot.Run(Services);
+			await bot.RunAsync(Services, botCancellationTokenSource.Token);
+
+			// shut down blocking.
+			await bot.ShutdownAsync();
+			await Api.ShutdownAsync();
+
+			// give things a few ms to finish up.
+			Task.Delay(500).Wait();
 		}
 
 		private static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
 		{
 			Services.GetService<ILogger>()?.Log(Tag, "Console cancel key press received.");
-			Services.GetService<DiscordBot>()?.Shutdown().Wait();
+			botCancellationTokenSource.Cancel();
 		}
 	}
 }

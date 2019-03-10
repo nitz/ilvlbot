@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace bnet.Responses
 {
@@ -7,26 +8,23 @@ namespace bnet.Responses
 	{
 		private static readonly DateTime unixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-		public static DateTime MsUnixTimeToDateTime(this long time_since_epoch_in_ms)
+		public static DateTime MsUnixTimeToDateTime(this long timeSinceEpochInMilliseconds)
 		{
-			return unixEpoch.AddMilliseconds(time_since_epoch_in_ms);
+			return unixEpoch.AddMilliseconds(timeSinceEpochInMilliseconds);
 		}
 
-		public static DateTime UnixTimeToDateTime(this int time_since_epoch_in_seconds)
+		public static DateTime UnixTimeToDateTime(this int timeSinceEpochInSeconds)
 		{
-			return unixEpoch.AddSeconds(time_since_epoch_in_seconds);
+			return unixEpoch.AddSeconds(timeSinceEpochInSeconds);
 		}
 
 		public static CharacterClasses Classes { get; private set; }
 		public static CharacterRaces Races { get; private set; }
 
-		internal static void GetStaticInformation()
+		internal static async Task GetStaticInformationAsync()
 		{
-			var cl_task = Requests.Get.CharacterClasses();
-			var ra_task = Requests.Get.CharacterRaces();
-
-			Classes = cl_task.GetAwaiter().GetResult();
-			Races = ra_task.GetAwaiter().GetResult();
+			Classes = await Requests.Get.CharacterClasses();
+			Races = await Requests.Get.CharacterRaces();
 		}
 
 		public static Class ToClass(this int cl)

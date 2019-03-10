@@ -19,6 +19,7 @@ namespace bnet
 		public static ClientSecret Secrets { internal get; set; } = null;
 		internal static OAuthAccessToken Token { get { lock (_accessToken) { return _accessToken; } } }
 
+		private static bool _initialized = false;
 		private static OAuthAccessToken _accessToken = null;
 		private static Task _accessTokenRenewal = null;
 		private static CancellationTokenSource _accessTokenRenewalCancellation;
@@ -27,8 +28,13 @@ namespace bnet
 
 		private static readonly TimeSpan FullDelay = TimeSpan.FromMilliseconds(int.MaxValue);
 
-		public static bool Initialize(ClientSecret secrets, IServiceProvider services)
+		public static async Task<bool> InitializeAsync(ClientSecret secrets, IServiceProvider services)
 		{
+			if (_initialized)
+			{
+				return _initialized;
+			}
+
 			// store key, generate invalid access token.
 			Secrets = secrets;
 			_services = services;
@@ -42,7 +48,7 @@ namespace bnet
 				// set up timer to refresh access token.
 				// this is probably not the best way to do this.
 				_accessTokenRenewalCancellation = new CancellationTokenSource();
-				_accessTokenRenewal = Task.Factory.StartNew(KeepAccessTokenRenewed, _accessTokenRenewalCancellation.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+				_accessTokenRenewal = Task.Run(async () => await KeepAccessTokenRenewedAsync(), _accessTokenRenewalCancellation.Token);
 
 				DateTime failAt = DateTime.Now.AddSeconds(5);
 
@@ -63,22 +69,45 @@ namespace bnet
 
 						_accessTokenRenewalCancellation.Cancel(throwOnFirstException: true);
 
-						return false;
+						return _initialized;
 					}
 
 					// no need to thrash the cpu while we wait.
-					Task.Delay(1).Wait();
+					await Task.Delay(1);
 				}
 
 				// set up the extension methods with the data they need.
-				Extensions.GetStaticInformation();
-				return true;
+				await Extensions.GetStaticInformationAsync();
+
+				_initialized = true;
+
+				return _initialized;
 			}
-			catch (System.Exception /*ex*/)
+			catch (Exception /*ex*/)
 			{
 				// failed to get static info for some  reason... we should probably handle that somehow.
 				// for now, let our caller handle the failure, probably by retrying.
-				return false;
+				return _initialized;
+			}
+		}
+
+		public static async Task ShutdownAsync()
+		{
+			if (_initialized)
+			{
+				try
+				{
+					_accessTokenRenewalCancellation.Cancel(throwOnFirstException: true);
+				}
+				catch { }
+
+				await _accessTokenRenewal;
+
+				_accessTokenRenewal = null;
+				Secrets = null;
+				_services = null;
+				_accessToken = null;
+				_initialized = false;
 			}
 		}
 
@@ -116,18 +145,23 @@ namespace bnet
 			return true;
 		}
 
-		private static void KeepAccessTokenRenewed()
+		private async static Task KeepAccessTokenRenewedAsync()
 		{
 			while (_accessTokenRenewalCancellation.Token.IsCancellationRequested == false)
 			{
 				Log("Getting new OAuth access token...");
 
-				bool gotNewToken = RenewOAuthTokenNowAsync().GetAwaiter().GetResult();
+				bool gotNewToken = await RenewOAuthTokenNowAsync();
 
 				if (gotNewToken == false)
 				{
 					Log($"Access token invalid, retrying in {_accessTokenRenewalFailRetry}...");
-					Task.Delay(_accessTokenRenewalFailRetry, _accessTokenRenewalCancellation.Token).Wait();
+
+					try
+					{
+						await Task.Delay(_accessTokenRenewalFailRetry, _accessTokenRenewalCancellation.Token);
+					}
+					catch (TaskCanceledException) { }
 				}
 
 				var renewAt = _accessToken.ExpiresAt.Subtract(_accessTokenRenewBefore);
@@ -136,7 +170,11 @@ namespace bnet
 				Log($"Successfully retrieved access token.");
 				Log($"Will attempt to renew at {renewAt}, delaying for: {delayFor}");
 
-				Task.Delay(delayFor, _accessTokenRenewalCancellation.Token).Wait();
+				try
+				{
+					await Task.Delay(delayFor, _accessTokenRenewalCancellation.Token);
+				}
+				catch (TaskCanceledException) { }
 			}
 		}
 

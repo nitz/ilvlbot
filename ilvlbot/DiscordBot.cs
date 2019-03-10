@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using ilvlbot.Services.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ilvlbot
@@ -28,7 +29,7 @@ namespace ilvlbot
 			_client = new DiscordSocketClient(config);
 		}
 
-		public async Task Run(IServiceProvider services)
+		public async Task RunAsync(IServiceProvider services, CancellationToken cancellationToken = default)
 		{
 			try
 			{
@@ -51,7 +52,14 @@ namespace ilvlbot
 				await _commands.InitializeCommandModulesAsync(services);
 
 				// hang out forever.
-				await Task.Delay(-1);
+				try
+				{
+					await Task.Delay(-1, cancellationToken);
+				}
+				catch (TaskCanceledException)
+				{
+					// all good!
+				}
 			}
 			catch (System.Net.WebException wex)
 			{
@@ -89,7 +97,7 @@ namespace ilvlbot
 
 		#endregion Client Event Handlers
 
-		public async Task Shutdown()
+		public async Task ShutdownAsync()
 		{
 			if (_client != null && _client.ConnectionState == ConnectionState.Connected)
 			{
@@ -99,7 +107,7 @@ namespace ilvlbot
 			}
 		}
 
-		public async Task SetGame(string game, string url = "")
+		public async Task SetGameAsync(string game, string url = "")
 		{
 			await _client.SetGameAsync(game, url, ActivityType.Playing);
 			_logger.Log(Tag, $"Game changed to {game} ({url}).");
