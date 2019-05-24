@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <Copyright>Copyright © cmd#0001 2017-2019</Copyright>
     <PackageLicenseUrl>https://github.com/nitz/ilvlbot/blob/master/LICENSE</PackageLicenseUrl>
